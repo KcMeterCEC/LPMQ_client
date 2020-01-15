@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>images/link.png</file>
+        <file>images/unlink.png</file>
+        <file>images/monitor.png</file>
+    </qresource>
+</RCC>
