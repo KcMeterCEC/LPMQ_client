@@ -13,13 +13,6 @@
   <property name="windowTitle">
    <string>lpmq</string>
   </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>images/monitor.png</normaloff>
-    <normalon>images/monitor.png</normalon>
-    <activeon>images/monitor.png</activeon>
-    <selectedon>images/monitor.png</selectedon>images/monitor.png</iconset>
-  </property>
   <property name="toolButtonStyle">
    <enum>Qt::ToolButtonTextBesideIcon</enum>
   </property>
@@ -37,7 +30,7 @@
     <property name="title">
      <string>control(&amp;C)</string>
     </property>
-    <addaction name="actionconnect_N"/>
+    <addaction name="actionconnect"/>
    </widget>
    <addaction name="menucontrol_C"/>
   </widget>
@@ -52,15 +45,15 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionconnect_N"/>
+   <addaction name="actionconnect"/>
   </widget>
-  <action name="actionconnect_N">
+  <action name="actionconnect">
    <property name="icon">
-    <iconset>
-     <normaloff>images/link.png</normaloff>images/link.png</iconset>
+    <iconset resource="uimages.qrc">
+     <normaloff>:/images/images/link.png</normaloff>:/images/images/link.png</iconset>
    </property>
    <property name="text">
-    <string>connect(&amp;N)</string>
+    <string>connect</string>
    </property>
    <property name="toolTip">
     <string>connect to server</string>
@@ -70,6 +63,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="uimages.qrc"/>
+ </resources>
  <connections/>
 </ui>

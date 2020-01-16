@@ -8,6 +8,7 @@ namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
 class Commander;
+class QLabel;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -18,9 +19,14 @@ public:
 
 private:
     Commander       *cmd;
+    QLabel          *connectLab;
+
+    void    disConnectStatus(void);
+
+    void    closeEvent(QCloseEvent *event);
 private slots:
-    void on_actionconnect_N_triggered();
-    void connectReport(bool status);
+    void on_actionconnect_triggered();
+    void connectReport(bool status);    
 private:
     Ui::MainWindow *ui;
 };
