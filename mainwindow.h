@@ -26,7 +26,7 @@ private:
     void    closeEvent(QCloseEvent *event);
 private slots:
     void on_actionconnect_triggered();
-    void connectReport(bool status);    
+    void connectReport(bool status, const QString &errStr);
 private:
     Ui::MainWindow *ui;
 };

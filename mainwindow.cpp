@@ -22,8 +22,8 @@ MainWindow::MainWindow(QWidget *parent)
     cmd = new Commander(this);
     Q_CHECK_PTR(cmd);
 
-    connect(cmd, SIGNAL(connectStatus(bool)),
-            this, SLOT(connectReport(bool)));
+    connect(cmd, SIGNAL(connectStatus(bool, const QString &)),
+            this, SLOT(connectReport(bool, const QString &)));
 
     connectLab = new QLabel(this);
     Q_CHECK_PTR(connectLab);
@@ -97,7 +97,7 @@ void    MainWindow::disConnectStatus(void)
         connectLab->setStyleSheet("color: rgb(255, 0, 0);");
     }
 }
-void MainWindow::connectReport(bool status)
+void MainWindow::connectReport(bool status, const QString &errStr)
 {
     qDebug() << "status " << status;
 
@@ -109,8 +109,8 @@ void MainWindow::connectReport(bool status)
     else
     {
         QMessageBox::warning(this,
-                             tr("connection"),
-                             tr("Can't connect to server!"),
+                             tr("connection error"),
+                             errStr,
                              QMessageBox::Ok);
 
         cmd->disconnect2Server();

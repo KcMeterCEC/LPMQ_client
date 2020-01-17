@@ -39,7 +39,7 @@ void    Commander::connectSlot(void)
 
     hasConnected = true;
 
-    emit connectStatus(hasConnected);
+    emit connectStatus(hasConnected, "");
 }
 void    Commander::errorSlot(QAbstractSocket::SocketError err)
 {
@@ -49,7 +49,7 @@ void    Commander::errorSlot(QAbstractSocket::SocketError err)
 
     hasConnected = false;
 
-    emit connectStatus(hasConnected);
+    emit connectStatus(hasConnected, socket->errorString());
 }
 void    Commander::recvSlot(void)
 {
