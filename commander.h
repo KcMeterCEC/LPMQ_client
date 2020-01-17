@@ -46,7 +46,7 @@ private slots:
     void    errorSlot(QAbstractSocket::SocketError err);
     void    recvSlot(void);
 signals:
-    void    connectStatus(bool status);
+    void    connectStatus(bool status, const QString & errStr);
 };
 
 #endif // COMMANDER_H
