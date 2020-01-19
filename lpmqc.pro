@@ -20,11 +20,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     commander.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    rb.cpp
 
 HEADERS += \
     commander.h \
-    mainwindow.h
+    mainwindow.h \
+    rb.h
 
 FORMS += \
     mainwindow.ui

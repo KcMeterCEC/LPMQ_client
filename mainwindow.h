@@ -18,8 +18,9 @@ public:
     ~MainWindow();
 
 private:
-    Commander       *cmd;
-    QLabel          *connectLab;
+    Commander       *cmd = nullptr;
+    QLabel          *connectLab = nullptr;
+    QLabel          *sysInfoSataus;
 
     void    disConnectStatus(void);
 
@@ -27,6 +28,8 @@ private:
 private slots:
     void on_actionconnect_triggered();
     void connectReport(bool status, const QString &errStr);
+
+    void  showSysInfo(const QString &result);
 private:
     Ui::MainWindow *ui;
 };

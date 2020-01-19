@@ -25,11 +25,19 @@ MainWindow::MainWindow(QWidget *parent)
     connect(cmd, SIGNAL(connectStatus(bool, const QString &)),
             this, SLOT(connectReport(bool, const QString &)));
 
+    connect(cmd, SIGNAL(resultSysInfo(const QString &)),
+            this, SLOT(showSysInfo(const QString &)));
+
     connectLab = new QLabel(this);
     Q_CHECK_PTR(connectLab);
     ui->statusbar->addPermanentWidget(connectLab);
 
+    sysInfoSataus = new QLabel(this);
+    Q_CHECK_PTR(sysInfoSataus);
+
     disConnectStatus();
+
+    qDebug() << "sizeof cmd is " << sizeof(Header);
 }
 
 MainWindow::~MainWindow()
@@ -115,5 +123,22 @@ void MainWindow::connectReport(bool status, const QString &errStr)
 
         cmd->disconnect2Server();
         disConnectStatus();
+    }
+}
+void  MainWindow::showSysInfo(const QString &result)
+{
+    qDebug() << "sys info result:";
+
+    QStringList list = result.split(QRegExp("[\t\n:]"));
+    list.removeAll("");
+
+
+    for(auto v = list.cbegin(); v != list.cend(); ++v)
+    {
+        if(*v == "model name")
+        {
+            sysInfoSataus->setText(*(v + 1));
+            ui->statusbar->addWidget(sysInfoSataus);
+        }
     }
 }
