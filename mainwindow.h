@@ -20,7 +20,7 @@ public:
 private:
     Commander       *cmd = nullptr;
     QLabel          *connectLab = nullptr;
-    QLabel          *sysInfoSataus;
+    QLabel          *sysInfoStatus;
 
     void    disConnectStatus(void);
 

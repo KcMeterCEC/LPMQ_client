@@ -32,8 +32,8 @@ MainWindow::MainWindow(QWidget *parent)
     Q_CHECK_PTR(connectLab);
     ui->statusbar->addPermanentWidget(connectLab);
 
-    sysInfoSataus = new QLabel(this);
-    Q_CHECK_PTR(sysInfoSataus);
+    sysInfoStatus = new QLabel(this);
+    Q_CHECK_PTR(sysInfoStatus);
 
     disConnectStatus();
 
@@ -128,6 +128,7 @@ void MainWindow::connectReport(bool status, const QString &errStr)
 void  MainWindow::showSysInfo(const QString &result)
 {
     qDebug() << "sys info result:";
+    sysInfoStatus->setToolTip(result);
 
     QStringList list = result.split(QRegExp("[\t\n:]"));
     list.removeAll("");
@@ -137,8 +138,8 @@ void  MainWindow::showSysInfo(const QString &result)
     {
         if(*v == "model name")
         {
-            sysInfoSataus->setText(*(v + 1));
-            ui->statusbar->addWidget(sysInfoSataus);
+            sysInfoStatus->setText(*(v + 1));
+            ui->statusbar->addWidget(sysInfoStatus);
         }
     }
 }
