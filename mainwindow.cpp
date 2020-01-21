@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QLabel>
+#include <QSettings>
 
 #include "commander.h"
 
@@ -35,6 +36,9 @@ MainWindow::MainWindow(QWidget *parent)
     sysInfoStatus = new QLabel(this);
     Q_CHECK_PTR(sysInfoStatus);
 
+    userCfg = new QSettings("kcmetercec","lpmq");
+    Q_CHECK_PTR(userCfg);
+
     disConnectStatus();
 
     qDebug() << "sizeof cmd is " << sizeof(Header);
@@ -43,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete userCfg;
 }
 void    MainWindow::closeEvent(QCloseEvent *event)
 {
@@ -61,12 +66,26 @@ void MainWindow::on_actionconnect_triggered()
 
         QString ip(" IP: ");
         QLineEdit  *ipInput = new QLineEdit(&conDialog);
-        ipInput->setPlaceholderText(tr("*.local or IP address"));
+
+        if(userCfg->contains("serverAddr"))
+        {
+            ipInput->setText(userCfg->value("serverAddr").toString());
+        }
+        else
+        {
+            ipInput->setPlaceholderText(tr("*.local or IP address"));
+        }
+
         layout.addRow(ip, ipInput);
 
         QString port(tr("Port:"));
         QSpinBox   *portInput = new QSpinBox(&conDialog);
         portInput->setRange(1024, UINT16_MAX);
+
+        if(userCfg->contains("serverPort"))
+        {
+            portInput->setValue(userCfg->value("serverPort").toInt());
+        }
         layout.addRow(port, portInput);
 
         QDialogButtonBox buttonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
@@ -78,6 +97,8 @@ void MainWindow::on_actionconnect_triggered()
 
         if(conDialog.exec() == QDialog::Accepted)
         {
+            userCfg->setValue("serverAddr", ipInput->text());
+            userCfg->setValue("serverPort", portInput->value());
             cmd->connect2Server(ipInput->text(),
                                 portInput->value());
         }

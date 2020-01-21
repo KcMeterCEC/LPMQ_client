@@ -9,6 +9,7 @@ QT_END_NAMESPACE
 
 class Commander;
 class QLabel;
+class QSettings;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -21,6 +22,7 @@ private:
     Commander       *cmd = nullptr;
     QLabel          *connectLab = nullptr;
     QLabel          *sysInfoStatus;
+    QSettings       *userCfg;
 
     void    disConnectStatus(void);
 
