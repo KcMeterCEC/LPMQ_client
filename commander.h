@@ -3,9 +3,11 @@
 
 #include <QObject>
 #include <QtNetwork/QAbstractSocket>
+#include <Qmap>
 
 class QTcpSocket;
 class Rb;
+class Process;
 
 #define HEAD_CK (0xA5)
 
@@ -43,6 +45,7 @@ public:
     bool    isConnect() const;
 
     void    requestSysInfo(void);
+    void    requestCpuUsage(void);
 private:
     QTcpSocket          *socket = nullptr;
     bool                hasConnected = false;
@@ -55,6 +58,8 @@ private:
         GET_CONTENTS,
     }status;
 
+    Process             *ps;
+
     bool    send2Server(void);
 
     void    execSysInfo(const char *buf);
@@ -65,7 +70,8 @@ private slots:
 signals:
     void    connectStatus(bool status, const QString & errStr);
 
-    void    resultSysInfo(const QString &result);
+    void    resultSysInfo(const QMap<QString, QString> &info);
+    void    psResultCpuUsage(const QMap<QString, double> &info);
 };
 
 #endif // COMMANDER_H

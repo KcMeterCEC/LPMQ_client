@@ -10,8 +10,15 @@
 #include <QMessageBox>
 #include <QLabel>
 #include <QSettings>
+#include <QTimer>
+#include <QSpinBox>
+#include <QGridLayout>
+#include <QtCharts/QChartView>
 
 #include "commander.h"
+#include "display/donutbreakdown/dispiechart.h"
+
+QT_CHARTS_USE_NAMESPACE
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -26,8 +33,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(cmd, SIGNAL(connectStatus(bool, const QString &)),
             this, SLOT(connectReport(bool, const QString &)));
 
-    connect(cmd, SIGNAL(resultSysInfo(const QString &)),
-            this, SLOT(showSysInfo(const QString &)));
+    connect(cmd, SIGNAL(resultSysInfo(const QMap<QString, QString> &)),
+            this, SLOT(showSysInfo(const QMap<QString, QString> &)));
+
+    connect(cmd, SIGNAL(psResultCpuUsage(const QMap<QString, double> &)),
+            this, SLOT(showCpuUsage(const QMap<QString, double> &)));
 
     connectLab = new QLabel(this);
     Q_CHECK_PTR(connectLab);
@@ -39,7 +49,29 @@ MainWindow::MainWindow(QWidget *parent)
     userCfg = new QSettings("kcmetercec","lpmq");
     Q_CHECK_PTR(userCfg);
 
+    overviewTimer = new QTimer(this);
+    Q_CHECK_PTR(overviewTimer);
+    connect(overviewTimer, SIGNAL(timeout()),
+            this, SLOT(execOverview()));
+
+    timeAdj = new QSpinBox(this);
+    Q_CHECK_PTR(timeAdj);
+    timeAdj->setValue(5);
+    timeAdj->setMinimum(1);
+    timeAdj->setMaximum(60);
+    timeAdj->setPrefix(tr("period "));
+    timeAdj->setSuffix(" s");
+    connect(timeAdj, SIGNAL(valueChanged(int)),
+            this, SLOT(triggerValueChanged(int)));
+    ui->toolBar->addWidget(timeAdj);
+
+    overviewChart = new DisPieChart(this);
+    Q_CHECK_PTR(overviewChart);
+    QChartView *psChart = overviewChart->createPsChart();
+
     disConnectStatus();
+
+    ui->gridLayout->addWidget(psChart, 0, 0, 3, 3);
 
     qDebug() << "sizeof cmd is " << sizeof(Header);
 }
@@ -117,6 +149,9 @@ void    MainWindow::disConnectStatus(void)
         ui->actionconnect->setText(tr("disconnect"));
         connectLab->setText(tr("connected"));
         connectLab->setStyleSheet("color: rgb(51, 255, 51);");
+
+        refreshTriggerTime(timeAdj->value());
+        overviewTimer->start(timeAdj->value() * 1000);
     }
     else
     {
@@ -124,6 +159,8 @@ void    MainWindow::disConnectStatus(void)
         ui->actionconnect->setText(tr("connect"));
         connectLab->setText(tr("disconnected"));
         connectLab->setStyleSheet("color: rgb(255, 0, 0);");
+
+        overviewTimer->stop();
     }
 }
 void MainWindow::connectReport(bool status, const QString &errStr)
@@ -134,6 +171,7 @@ void MainWindow::connectReport(bool status, const QString &errStr)
     {
         disConnectStatus();
         cmd->requestSysInfo();
+        cmd->requestCpuUsage();
     }
     else
     {
@@ -146,21 +184,35 @@ void MainWindow::connectReport(bool status, const QString &errStr)
         disConnectStatus();
     }
 }
-void  MainWindow::showSysInfo(const QString &result)
+void  MainWindow::showSysInfo(const QMap<QString, QString> &info)
 {
-    qDebug() << "sys info result:";
+    QString result;
+
+    QMap<QString, QString>::const_iterator i = info.constBegin();
+    while (i != info.constEnd()) {
+        result += i.key() + ": " + i.value() + "\n";
+        ++i;
+    }
     sysInfoStatus->setToolTip(result);
 
-    QStringList list = result.split(QRegExp("[\t\n:]"));
-    list.removeAll("");
+    sysInfoStatus->setText(info.value("model name"));
+    ui->statusbar->addWidget(sysInfoStatus);
+}
+void MainWindow::execOverview()
+{
+    cmd->requestCpuUsage();
+}
+void MainWindow::refreshTriggerTime(int value)
+{
+    overviewTimer->setInterval(value * 1000);
 
-
-    for(auto v = list.cbegin(); v != list.cend(); ++v)
-    {
-        if(*v == "model name")
-        {
-            sysInfoStatus->setText(*(v + 1));
-            ui->statusbar->addWidget(sysInfoStatus);
-        }
-    }
+    qDebug() << "value:" << value;
+}
+void MainWindow::triggerValueChanged(int value)
+{
+    refreshTriggerTime(value);
+}
+void  MainWindow::showCpuUsage(const QMap<QString, double> &info)
+{
+    overviewChart->refreshPsChart(info);
 }

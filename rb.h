@@ -1,5 +1,5 @@
-#ifndef __RB_H__
-#define __RB_H__
+#ifndef RB_H
+#define RB_H
 #include <cstdint>
 #include <vector>
 

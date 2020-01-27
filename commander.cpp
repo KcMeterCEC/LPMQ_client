@@ -1,5 +1,6 @@
 #include "commander.h"
 #include "rb.h"
+#include "process.h"
 
 #include <QtNetwork/QTcpSocket>
 #include <QDebug>
@@ -22,11 +23,19 @@ Commander::Commander(QObject *parent) : QObject(parent),status(GET_HEAD)
     head.ck = HEAD_CK;
 
     recvBuf = new Rb(sizeof(socketBuf));
+    Q_CHECK_PTR(recvBuf);
+
+    ps = new Process();
+    Q_CHECK_PTR(ps);
+
+    connect(ps, SIGNAL(resultCpuUsage(const QMap<QString, double> &)),
+            this, SIGNAL(psResultCpuUsage(const QMap<QString, double> &)));
 
 }
 Commander::~Commander()
 {
     delete recvBuf;
+    delete  ps;
 }
 void    Commander::connect2Server(const QString &ip, quint16 port)
 {
@@ -98,6 +107,7 @@ void    Commander::recvSlot(void)
         {
             if(recvBuf->read(socketBuf, head.payload_len))
             {
+                socketBuf[head.payload_len] = '\0';
                 status = GET_HEAD;
                 switch(head.cmd)
                 {
@@ -109,6 +119,7 @@ void    Commander::recvSlot(void)
                 case CLASS_PS:
                 {
                     qDebug() << "get CLASS_PS";
+                    ps->execCpuCmd(socketBuf);
                 }break;
                 case CLASS_MEM:
                 {
@@ -127,7 +138,6 @@ void    Commander::recvSlot(void)
             }
         }
     }
-
 }
 bool    Commander::isConnect() const
 {
@@ -166,5 +176,35 @@ bool    Commander::send2Server(void)
 }
 void    Commander::execSysInfo(const char *buf)
 {
-    emit resultSysInfo(buf);
+    const QString &result = buf;
+    QStringList list = result.split(QRegExp("[\t\n:]"));
+    list.removeAll("");
+
+    QMap<QString, QString> infomap;
+    quint8 coreNum = 1;
+    for(auto v = list.cbegin(); v != list.cend(); ++v)
+    {
+        if(*v == "model name")
+        {
+            infomap["model name"] = *(v + 1);
+        }
+        else if(*v == "bogomips")
+        {
+            infomap["bogomips"] = *(v + 1);
+        }
+        else if(*v == "processor")
+        {
+            infomap["processor"] = QString("%1").arg(coreNum);
+            ++coreNum;
+        }
+    }
+
+    emit resultSysInfo(infomap);
+}
+
+void    Commander::requestCpuUsage(void)
+{
+    head.cmd = CLASS_PS;
+    head.payload_len = ps->requestCpuStat(socketBuf);
+    send2Server();
 }
