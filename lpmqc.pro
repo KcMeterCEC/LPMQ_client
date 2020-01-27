@@ -2,7 +2,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-QT += network
+QT += network charts
 
 CONFIG += c++11
 
@@ -19,14 +19,22 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     commander.cpp \
+    display/donutbreakdown/dispiechart.cpp \
+    display/donutbreakdown/donutbreakdownchart.cpp \
+    display/donutbreakdown/mainslice.cpp \
     main.cpp \
     mainwindow.cpp \
-    rb.cpp
+    rb.cpp \
+    process.cpp
 
 HEADERS += \
     commander.h \
+    display/donutbreakdown/dispiechart.h \
+    display/donutbreakdown/donutbreakdownchart.h \
+    display/donutbreakdown/mainslice.h \
     mainwindow.h \
-    rb.h
+    rb.h \
+    process.h
 
 FORMS += \
     mainwindow.ui

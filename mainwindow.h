@@ -10,6 +10,10 @@ QT_END_NAMESPACE
 class Commander;
 class QLabel;
 class QSettings;
+class QTimer;
+class QSpinBox;
+class DisPieChart;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -23,15 +27,23 @@ private:
     QLabel          *connectLab = nullptr;
     QLabel          *sysInfoStatus;
     QSettings       *userCfg;
+    QTimer          *overviewTimer;
+    QSpinBox        *timeAdj;
+    DisPieChart     *overviewChart;
 
     void    disConnectStatus(void);
+    void    refreshTriggerTime(int value);
 
     void    closeEvent(QCloseEvent *event);
 private slots:
     void on_actionconnect_triggered();
     void connectReport(bool status, const QString &errStr);
+    void execOverview();
 
-    void  showSysInfo(const QString &result);
+    void showSysInfo(const QMap<QString, QString> &info);
+    void showCpuUsage(const QMap<QString, double> &info);
+    void triggerValueChanged(int value);
+
 private:
     Ui::MainWindow *ui;
 };

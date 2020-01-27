@@ -71,7 +71,7 @@ bool Rb::read(char *rbuf, std::uint32_t size)
 
     if(full_size < size)
     {
-        qDebug() << "ring buffer hasn't enough data!";
+//        qDebug() << "ring buffer hasn't enough data!";
         return false;
     }
 
