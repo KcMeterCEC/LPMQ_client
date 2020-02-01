@@ -28,8 +28,8 @@ QChartView *DisPieChart::createPsChart()
     Q_CHECK_PTR(psFree);
     psFree->setName(tr("idle"));
     psFree->append("idle", 0.1);
-
-    psChart->setAnimationOptions(QChart::AllAnimations);
+    //animation will take many cpu usage
+//    psChart->setAnimationOptions(QChart::AllAnimations);
     psChart->setTitle(tr("process overview"));
     psChart->legend()->setAlignment(Qt::AlignRight);
     psChart->addBreakdownSeries(psUsed, Qt::red);

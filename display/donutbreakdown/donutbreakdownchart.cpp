@@ -51,6 +51,8 @@ void DonutBreakdownChart::addBreakdownSeries(QPieSeries *breakdownSeries, QColor
 {
     QFont font("Arial", 8);
 
+    breakdownSeries->setLabelsPosition(QPieSlice::LabelInsideTangential);
+
     // add breakdown series as a slice to center pie
     MainSlice *mainSlice = new MainSlice(breakdownSeries);
     mainSlice->setName(breakdownSeries->name());

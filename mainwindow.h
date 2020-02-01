@@ -13,6 +13,7 @@ class QSettings;
 class QTimer;
 class QSpinBox;
 class DisPieChart;
+class DisLineChart;
 
 class MainWindow : public QMainWindow
 {
@@ -29,7 +30,8 @@ private:
     QSettings       *userCfg;
     QTimer          *overviewTimer;
     QSpinBox        *timeAdj;
-    DisPieChart     *overviewChart;
+    DisPieChart     *overviewPie;
+    DisLineChart    *overviewLine;
 
     void    disConnectStatus(void);
     void    refreshTriggerTime(int value);
