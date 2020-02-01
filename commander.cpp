@@ -79,7 +79,7 @@ void    Commander::recvSlot(void)
 
     if((unsigned int)recv.size() >= sizeof(socketBuf))
     {
-        qFatal("received size of data is out of range!");
+        qFatal("received size of data is out of range: %d\n", recv.size());
     }
     recvBuf->write(recv.constData(), recv.size());
 

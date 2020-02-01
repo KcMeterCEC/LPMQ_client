@@ -22,6 +22,7 @@ SOURCES += \
     display/donutbreakdown/dispiechart.cpp \
     display/donutbreakdown/donutbreakdownchart.cpp \
     display/donutbreakdown/mainslice.cpp \
+    display/multiline/dislinechart.cpp \
     main.cpp \
     mainwindow.cpp \
     rb.cpp \
@@ -32,6 +33,7 @@ HEADERS += \
     display/donutbreakdown/dispiechart.h \
     display/donutbreakdown/donutbreakdownchart.h \
     display/donutbreakdown/mainslice.h \
+    display/multiline/dislinechart.h \
     mainwindow.h \
     rb.h \
     process.h

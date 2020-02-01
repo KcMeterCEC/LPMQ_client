@@ -17,6 +17,7 @@
 
 #include "commander.h"
 #include "display/donutbreakdown/dispiechart.h"
+#include "display/multiline/dislinechart.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -65,13 +66,20 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(triggerValueChanged(int)));
     ui->toolBar->addWidget(timeAdj);
 
-    overviewChart = new DisPieChart(this);
-    Q_CHECK_PTR(overviewChart);
-    QChartView *psChart = overviewChart->createPsChart();
+    overviewPie = new DisPieChart(this);
+    Q_CHECK_PTR(overviewPie);
+    QChartView *psChart = overviewPie->createPsChart();
+
+    overviewLine = new DisLineChart(this);
+    Q_CHECK_PTR(overviewLine);
+    ui->gridLayout->addWidget(psChart, 0, 0, 1, 5);
+
+    QChartView *psLine = overviewLine->createPsChart();
+    Q_CHECK_PTR(psLine);
+    ui->gridLayout->addWidget(psLine, 0, 5, 1, 10);
+    overviewLine->insertPsChart(2);
 
     disConnectStatus();
-
-    ui->gridLayout->addWidget(psChart, 0, 0, 3, 3);
 
     qDebug() << "sizeof cmd is " << sizeof(Header);
 }
@@ -205,8 +213,6 @@ void MainWindow::execOverview()
 void MainWindow::refreshTriggerTime(int value)
 {
     overviewTimer->setInterval(value * 1000);
-
-    qDebug() << "value:" << value;
 }
 void MainWindow::triggerValueChanged(int value)
 {
@@ -214,5 +220,10 @@ void MainWindow::triggerValueChanged(int value)
 }
 void  MainWindow::showCpuUsage(const QMap<QString, double> &info)
 {
-    overviewChart->refreshPsChart(info);
+    if(!overviewLine->psLineCreated())
+    {
+        overviewLine->insertPsChart(info.value("cpu count"));
+    }
+    overviewLine->refreshPsChart(info);
+    overviewPie->refreshPsChart(info);
 }
