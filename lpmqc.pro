@@ -25,6 +25,7 @@ SOURCES += \
     display/multiline/dislinechart.cpp \
     main.cpp \
     mainwindow.cpp \
+    mem.cpp \
     rb.cpp \
     process.cpp
 
@@ -35,6 +36,7 @@ HEADERS += \
     display/donutbreakdown/mainslice.h \
     display/multiline/dislinechart.h \
     mainwindow.h \
+    mem.h \
     rb.h \
     process.h
 

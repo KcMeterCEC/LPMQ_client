@@ -40,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(cmd, SIGNAL(psResultCpuUsage(const QMap<QString, double> &)),
             this, SLOT(showCpuUsage(const QMap<QString, double> &)));
 
+    connect(cmd, &Commander::memResultMemUsage,
+            this, &MainWindow::showMemUsage);
+
     connectLab = new QLabel(this);
     Q_CHECK_PTR(connectLab);
     ui->statusbar->addPermanentWidget(connectLab);
@@ -68,16 +71,21 @@ MainWindow::MainWindow(QWidget *parent)
 
     overviewPie = new DisPieChart(this);
     Q_CHECK_PTR(overviewPie);
+
     QChartView *psChart = overviewPie->createPsChart();
+    QChartView *memChart = overviewPie->createMemChart();
+
+    ui->gridLayout->addWidget(psChart, 0, 0, 1, 5);
+    ui->gridLayout->addWidget(memChart, 1, 0, 1, 15);
 
     overviewLine = new DisLineChart(this);
     Q_CHECK_PTR(overviewLine);
-    ui->gridLayout->addWidget(psChart, 0, 0, 1, 5);
 
     QChartView *psLine = overviewLine->createPsChart();
     Q_CHECK_PTR(psLine);
     ui->gridLayout->addWidget(psLine, 0, 5, 1, 10);
-    overviewLine->insertPsChart(2);
+
+
 
     disConnectStatus();
 
@@ -160,6 +168,7 @@ void    MainWindow::disConnectStatus(void)
 
         refreshTriggerTime(timeAdj->value());
         overviewTimer->start(timeAdj->value() * 1000);
+
     }
     else
     {
@@ -209,6 +218,7 @@ void  MainWindow::showSysInfo(const QMap<QString, QString> &info)
 void MainWindow::execOverview()
 {
     cmd->requestCpuUsage();
+    cmd->requestMemUsage();
 }
 void MainWindow::refreshTriggerTime(int value)
 {
@@ -226,4 +236,14 @@ void  MainWindow::showCpuUsage(const QMap<QString, double> &info)
     }
     overviewLine->refreshPsChart(info);
     overviewPie->refreshPsChart(info);
+}
+void MainWindow::showMemUsage(const QMap<QString, qulonglong> &info)
+{
+    qDebug() << "total " << info.value("mem.total");
+    qDebug() << "free " << info.value("mem.free");
+    qDebug() << "buffers " << info.value("mem.buffers");
+    qDebug() << "cache " << info.value("mem.cache");
+    qDebug() << "used " << info.value("mem.used");
+
+    overviewPie->refreshMemChart(info);
 }

@@ -17,10 +17,17 @@ public:
 
     QChartView *createPsChart();
     void  refreshPsChart(const QMap<QString, double> &info);
+
+    QChartView *createMemChart();
+    void  refreshMemChart(const QMap<QString, qulonglong> &info);
 private:
     DonutBreakdownChart     *psChart;
     QPieSeries              *psUsed;
     QPieSeries              *psFree;
+
+    DonutBreakdownChart     *memChart;
+    QPieSeries              *memUsed;
+    QPieSeries              *memFree;
 
 signals:
 

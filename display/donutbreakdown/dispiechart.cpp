@@ -6,6 +6,7 @@
 QT_CHARTS_USE_NAMESPACE
 
 DisPieChart::DisPieChart(QObject *parent) : QObject(parent), psChart(new DonutBreakdownChart())
+  ,memChart(new DonutBreakdownChart())
 {
 
 }
@@ -36,6 +37,30 @@ QChartView *DisPieChart::createPsChart()
     psChart->addBreakdownSeries(psFree, Qt::darkBlue);
 
     QChartView *chartView = new QChartView(psChart);
+    chartView->setRenderHint(QPainter::Antialiasing);
+
+    return chartView;
+}
+QChartView *DisPieChart::createMemChart()
+{
+    memUsed = new QPieSeries();
+    Q_CHECK_PTR(memUsed);
+    memUsed->setName(tr("using"));
+    memUsed->append("used", 0.1);
+    memUsed->append("buffers", 0.1);
+    memUsed->append("cache", 0.1);
+
+    memFree = new QPieSeries();
+    Q_CHECK_PTR(memFree);
+    memFree->setName(tr("free"));
+    memFree->append("free", 0.1);
+    //animation will take many cpu usage
+    memChart->setTitle(tr("memory overview"));
+    memChart->legend()->setAlignment(Qt::AlignRight);
+    memChart->addBreakdownSeries(memUsed, Qt::red);
+    memChart->addBreakdownSeries(memFree, Qt::darkBlue);
+
+    QChartView *chartView = new QChartView(memChart);
     chartView->setRenderHint(QPainter::Antialiasing);
 
     return chartView;
@@ -93,4 +118,34 @@ void  DisPieChart::refreshPsChart(const QMap<QString, double> &info)
     }
 
     psChart->refresh();
+}
+void  DisPieChart::refreshMemChart(const QMap<QString, qulonglong> &info)
+{
+    auto slices = memUsed->slices();
+    for (QPieSlice *slice : slices)
+    {
+        if(slice->label() == "used")
+        {
+            slice->setValue(info.value("mem.used"));
+        }
+        else if(slice->label() == "buffers")
+        {
+            slice->setValue(info.value("mem.buffers"));
+        }
+        else if(slice->label() == "cache")
+        {
+            slice->setValue(info.value("mem.cache"));
+        }
+    }
+
+    slices = memFree->slices();
+    for (QPieSlice *slice : slices)
+    {
+        if(slice->label() == "free")
+        {
+            slice->setValue(info.value("mem.free"));
+        }
+    }
+
+    memChart->refresh();
 }
