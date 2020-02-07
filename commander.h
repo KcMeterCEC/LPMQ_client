@@ -8,6 +8,7 @@
 class QTcpSocket;
 class Rb;
 class Process;
+class Mem;
 
 #define HEAD_CK (0xA5)
 
@@ -46,6 +47,8 @@ public:
 
     void    requestSysInfo(void);
     void    requestCpuUsage(void);
+
+    void    requestMemUsage(void);
 private:
     QTcpSocket          *socket = nullptr;
     bool                hasConnected = false;
@@ -59,6 +62,7 @@ private:
     }status;
 
     Process             *ps;
+    Mem                 *memory;
 
     bool    send2Server(void);
 
@@ -72,6 +76,8 @@ signals:
 
     void    resultSysInfo(const QMap<QString, QString> &info);
     void    psResultCpuUsage(const QMap<QString, double> &info);
+
+    void    memResultMemUsage(const QMap<QString, qulonglong> &info);
 };
 
 #endif // COMMANDER_H

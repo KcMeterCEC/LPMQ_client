@@ -1,6 +1,7 @@
 #include "commander.h"
 #include "rb.h"
 #include "process.h"
+#include "mem.h"
 
 #include <QtNetwork/QTcpSocket>
 #include <QDebug>
@@ -25,17 +26,21 @@ Commander::Commander(QObject *parent) : QObject(parent),status(GET_HEAD)
     recvBuf = new Rb(sizeof(socketBuf));
     Q_CHECK_PTR(recvBuf);
 
-    ps = new Process();
+    ps = new Process(this);
     Q_CHECK_PTR(ps);
 
     connect(ps, SIGNAL(resultCpuUsage(const QMap<QString, double> &)),
             this, SIGNAL(psResultCpuUsage(const QMap<QString, double> &)));
 
+    memory = new Mem(this);
+    Q_CHECK_PTR(memory);
+
+    connect(memory, &Mem::resultMemUsage,
+            this, &Commander::memResultMemUsage);
 }
 Commander::~Commander()
 {
     delete recvBuf;
-    delete  ps;
 }
 void    Commander::connect2Server(const QString &ip, quint16 port)
 {
@@ -124,6 +129,7 @@ void    Commander::recvSlot(void)
                 case CLASS_MEM:
                 {
                     qDebug() << "get CLASS_MEM";
+                    memory->execMemCmd(socketBuf);
                 }break;
                 case CLASS_IO:
                 {
@@ -206,5 +212,11 @@ void    Commander::requestCpuUsage(void)
 {
     head.cmd = CLASS_PS;
     head.payload_len = ps->requestCpuStat(socketBuf);
+    send2Server();
+}
+void    Commander::requestMemUsage(void)
+{
+    head.cmd = CLASS_MEM;
+    head.payload_len = memory->requestMemStat(socketBuf);
     send2Server();
 }

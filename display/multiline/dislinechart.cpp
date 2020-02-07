@@ -46,8 +46,8 @@ void  DisLineChart::refreshPsChart(const QMap<QString, double> &info)
 {
     for(int i = 0; i < info.value("cpu count"); ++i)
     {
-        qDebug() << QString("cpu%1").arg(i)
-                 << info.value(QString("cpu%1.usage").arg(i));
+//        qDebug() << QString("cpu%1").arg(i)
+//                 << info.value(QString("cpu%1.usage").arg(i));
         psLine[i]->setName(QString("cpu%1").arg(i));
         psLine[i]->append(psLine[i]->count(), info.value(QString("cpu%1.usage").arg(i)));
     }
