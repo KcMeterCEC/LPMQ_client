@@ -21,6 +21,8 @@ public:
     bool  psLineCreated(void);
     void  refreshPsChart(const QMap<QString, double> &info);
 
+    QChartView *createMemChart(void);
+    void  refreshMemChart(const QMap<QString, qulonglong> &info);
 private:
     QVector <QLineSeries *> psLine;
     QChart *psLineChart;
@@ -28,6 +30,9 @@ private:
     QValueAxis *psAxisX;
     QValueAxis *psAxisY;
     qreal       yMax = 0;
+
+    QVector <QLineSeries *> memLine;
+    QChart *memLineChart;
 signals:
 private slots:
     void       psPointAdded(int index);
