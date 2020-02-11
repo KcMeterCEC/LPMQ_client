@@ -34,6 +34,20 @@ void DisLineChart::insertPsChart(quint8 cpuNum)
     }
     hasPsLine = true;
 }
+void  DisLineChart::psChartClear(void)
+{
+    for (auto *series : psLine)
+    {
+        series->clear();
+    }
+}
+void  DisLineChart::memChartClear(void)
+{
+    for (auto *series : memLine)
+    {
+        series->clear();
+    }
+}
 QChartView *DisLineChart::createPsChart(void)
 {
     QChartView *chartView = new QChartView(psLineChart);

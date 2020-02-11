@@ -49,6 +49,8 @@ private slots:
 
     void triggerValueChanged(int value);
 
+    void on_actionclear_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

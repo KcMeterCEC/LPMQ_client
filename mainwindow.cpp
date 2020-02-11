@@ -241,12 +241,12 @@ void  MainWindow::showCpuUsage(const QMap<QString, double> &info)
 }
 void MainWindow::showMemUsage(const QMap<QString, qulonglong> &info)
 {
-    qDebug() << "total " << info.value("mem.total");
-    qDebug() << "free " << info.value("mem.free");
-    qDebug() << "buffers " << info.value("mem.buffers");
-    qDebug() << "cache " << info.value("mem.cache");
-    qDebug() << "used " << info.value("mem.used");
-
     overviewPie->refreshMemChart(info);
     overviewLine->refreshMemChart(info);
+}
+
+void MainWindow::on_actionclear_triggered()
+{
+    overviewLine->psChartClear();
+    overviewLine->memChartClear();
 }

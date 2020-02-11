@@ -20,9 +20,11 @@ public:
     void insertPsChart(quint8 cpuNum);
     bool  psLineCreated(void);
     void  refreshPsChart(const QMap<QString, double> &info);
+    void  psChartClear(void);
 
     QChartView *createMemChart(void);
     void  refreshMemChart(const QMap<QString, qulonglong> &info);
+    void  memChartClear(void);
 private:
     QVector <QLineSeries *> psLine;
     QChart *psLineChart;

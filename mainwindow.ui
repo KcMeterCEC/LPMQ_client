@@ -29,7 +29,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>26</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menucontrol_C">
@@ -37,6 +37,8 @@
      <string>control(&amp;C)</string>
     </property>
     <addaction name="actionconnect"/>
+    <addaction name="separator"/>
+    <addaction name="actionclear"/>
    </widget>
    <addaction name="menucontrol_C"/>
   </widget>
@@ -52,6 +54,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionconnect"/>
+   <addaction name="actionclear"/>
   </widget>
   <action name="actionconnect">
    <property name="icon">
@@ -66,6 +69,15 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionclear">
+   <property name="icon">
+    <iconset resource="uimages.qrc">
+     <normaloff>:/images/images/clear.png</normaloff>:/images/images/clear.png</iconset>
+   </property>
+   <property name="text">
+    <string>clear</string>
    </property>
   </action>
  </widget>

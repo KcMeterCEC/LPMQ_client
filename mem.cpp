@@ -16,8 +16,6 @@ void Mem::execMemStat(const QString &ret)
     QStringList list = ret.split(QRegExp("(kB){0,1}[:\n]"));
     list.removeAll("");
 
-    qDebug() << "mem stat return:";
-
     QMap<QString, qulonglong> stat;
     for(auto v = list.cbegin(); v!= list.cend(); ++v)
     {
