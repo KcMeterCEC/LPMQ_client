@@ -76,7 +76,7 @@ MainWindow::MainWindow(QWidget *parent)
     QChartView *memChart = overviewPie->createMemChart();
 
     ui->gridLayout->addWidget(psChart, 0, 0, 1, 5);
-    ui->gridLayout->addWidget(memChart, 1, 0, 1, 15);
+    ui->gridLayout->addWidget(memChart, 1, 0, 1, 5);
 
     overviewLine = new DisLineChart(this);
     Q_CHECK_PTR(overviewLine);
@@ -85,7 +85,9 @@ MainWindow::MainWindow(QWidget *parent)
     Q_CHECK_PTR(psLine);
     ui->gridLayout->addWidget(psLine, 0, 5, 1, 10);
 
-
+    QChartView *memLine = overviewLine->createMemChart();
+    Q_CHECK_PTR(memLine);
+    ui->gridLayout->addWidget(memLine, 1, 5, 1, 10);
 
     disConnectStatus();
 
@@ -246,4 +248,5 @@ void MainWindow::showMemUsage(const QMap<QString, qulonglong> &info)
     qDebug() << "used " << info.value("mem.used");
 
     overviewPie->refreshMemChart(info);
+    overviewLine->refreshMemChart(info);
 }

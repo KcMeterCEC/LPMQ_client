@@ -34,7 +34,7 @@ QChartView *DisPieChart::createPsChart()
     psChart->setTitle(tr("process overview"));
     psChart->legend()->setAlignment(Qt::AlignRight);
     psChart->addBreakdownSeries(psUsed, Qt::red);
-    psChart->addBreakdownSeries(psFree, Qt::darkBlue);
+    psChart->addBreakdownSeries(psFree, Qt::darkCyan);
 
     QChartView *chartView = new QChartView(psChart);
     chartView->setRenderHint(QPainter::Antialiasing);
@@ -58,7 +58,7 @@ QChartView *DisPieChart::createMemChart()
     memChart->setTitle(tr("memory overview"));
     memChart->legend()->setAlignment(Qt::AlignRight);
     memChart->addBreakdownSeries(memUsed, Qt::red);
-    memChart->addBreakdownSeries(memFree, Qt::darkBlue);
+    memChart->addBreakdownSeries(memFree, Qt::darkCyan);
 
     QChartView *chartView = new QChartView(memChart);
     chartView->setRenderHint(QPainter::Antialiasing);

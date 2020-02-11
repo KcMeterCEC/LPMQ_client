@@ -1,12 +1,15 @@
 #include "dislinechart.h"
 #include <QDebug>
-
+#include <QtCharts/QAreaSeries>
+#include <QPointF>
 
 QT_CHARTS_USE_NAMESPACE
 
 DisLineChart::DisLineChart(QObject *parent)
-: QObject(parent),psLineChart(new QChart()),
-  psAxisX (new QValueAxis()), psAxisY (new QValueAxis())
+: QObject(parent),
+  psLineChart(new QChart()),
+  psAxisX (new QValueAxis()), psAxisY (new QValueAxis()),
+  memLineChart(new QChart())
 {
     psLineChart->setTitle(tr("history of cpu usage"));
 
@@ -37,6 +40,56 @@ QChartView *DisLineChart::createPsChart(void)
     chartView->setRenderHint(QPainter::Antialiasing);
 
     return chartView;
+}
+QChartView *DisLineChart::createMemChart(void)
+{
+    memLineChart->setTitle(tr("history of memory usage"));
+
+    QLineSeries * lineUsed = new QLineSeries(memLineChart);
+    QLineSeries * lineUsedAddBuffers = new QLineSeries(memLineChart);
+    QLineSeries * lineUsedAddBuffersAndCache = new QLineSeries(memLineChart);
+    QLineSeries * lineTotal = new QLineSeries(memLineChart);
+
+    memLine.push_back(lineUsed);
+    memLine.push_back(lineUsedAddBuffers);
+    memLine.push_back(lineUsedAddBuffersAndCache);
+    memLine.push_back(lineTotal);
+
+    QAreaSeries *areaUsed = new QAreaSeries(lineUsed);
+    areaUsed->setName("used");
+    areaUsed->setColor(Qt::red);
+
+    QAreaSeries *areaBuffers = new QAreaSeries(lineUsedAddBuffers, lineUsed);
+    areaBuffers->setName("buffers");
+
+    QAreaSeries *areaCached = new QAreaSeries(lineUsedAddBuffersAndCache, lineUsedAddBuffers);
+    areaCached->setName("cached");
+
+    QAreaSeries *areaFree = new QAreaSeries(lineTotal, lineUsedAddBuffersAndCache);
+    areaFree->setName("free");
+    areaFree->setColor(Qt::darkCyan);
+
+    memLineChart->addSeries(areaUsed);
+    memLineChart->addSeries(areaBuffers);
+    memLineChart->addSeries(areaCached);
+    memLineChart->addSeries(areaFree);
+
+    memLineChart->createDefaultAxes();
+
+    QChartView *chartView = new QChartView(memLineChart);
+    chartView->setRenderHint(QPainter::Antialiasing);
+
+    return chartView;
+}
+void  DisLineChart::refreshMemChart(const QMap<QString, qulonglong> &info)
+{
+    memLine[0]->append(memLine[0]->count(), info.value("mem.used"));
+    memLine[1]->append(memLine[1]->count(), info.value("mem.used") + info.value("mem.buffers"));
+    memLine[2]->append(memLine[2]->count(), info.value("mem.used") + info.value("mem.buffers") + info.value("mem.cache"));
+    memLine[3]->append(memLine[3]->count(), info.value("mem.total"));
+
+    memLineChart->axes(Qt::Vertical).first()->setMax(info.value("mem.total"));
+    memLineChart->axes(Qt::Horizontal).first()->setMax(memLine[0]->count());
 }
 bool  DisLineChart::psLineCreated(void)
 {
