@@ -96,7 +96,14 @@ void    Commander::recvSlot(void)
             {
                 if(head.ck == HEAD_CK)
                 {
-                    status = GET_CONTENTS;
+                    if(head.status == CMD_OK)
+                    {
+                        status = GET_CONTENTS;
+                    }
+                    else
+                    {
+                        qDebug() << "something is wrong : " << head.status;
+                    }
                 }
                 else
                 {

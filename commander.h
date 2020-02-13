@@ -24,6 +24,7 @@ typedef enum
 {
     CMD_OK,
     CMD_NO_FILE,
+    CMD_FILE_READ_ERR,
 }cmd_status;
 
 struct Header
