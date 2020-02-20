@@ -27,13 +27,21 @@ typedef enum
     CMD_FILE_READ_ERR,
 }cmd_status;
 
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#endif
 struct Header
 {
     std::uint8_t        ck;
     std::uint8_t        cmd;
     std::int16_t        status;
     std::uint16_t       payload_len;
+#ifdef _MSC_VER
 };
+#pragma pack(pop)
+#else
+} __attribute__((__packed__));
+#endif
 
 class Commander : public QObject
 {
