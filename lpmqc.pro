@@ -23,6 +23,8 @@ SOURCES += \
     display/donutbreakdown/donutbreakdownchart.cpp \
     display/donutbreakdown/mainslice.cpp \
     display/multiline/dislinechart.cpp \
+    display/tasklist/filterwidget.cpp \
+    display/tasklist/tasklist.cpp \
     main.cpp \
     mainwindow.cpp \
     mem.cpp \
@@ -35,6 +37,8 @@ HEADERS += \
     display/donutbreakdown/donutbreakdownchart.h \
     display/donutbreakdown/mainslice.h \
     display/multiline/dislinechart.h \
+    display/tasklist/filterwidget.h \
+    display/tasklist/tasklist.h \
     mainwindow.h \
     mem.h \
     rb.h \

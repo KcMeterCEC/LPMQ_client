@@ -13,11 +13,12 @@
 #include <QTimer>
 #include <QSpinBox>
 #include <QGridLayout>
-#include <QtCharts/QChartView>
+#include <QMouseEvent>
 
 #include "commander.h"
 #include "display/donutbreakdown/dispiechart.h"
 #include "display/multiline/dislinechart.h"
+#include "display/tasklist/tasklist.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -72,8 +73,8 @@ MainWindow::MainWindow(QWidget *parent)
     overviewPie = new DisPieChart(this);
     Q_CHECK_PTR(overviewPie);
 
-    QChartView *psChart = overviewPie->createPsChart();
-    QChartView *memChart = overviewPie->createMemChart();
+    psChart = overviewPie->createPsChart();
+    memChart = overviewPie->createMemChart();
 
     ui->gridLayout->addWidget(psChart, 0, 0, 1, 5);
     ui->gridLayout->addWidget(memChart, 1, 0, 1, 5);
@@ -81,13 +82,16 @@ MainWindow::MainWindow(QWidget *parent)
     overviewLine = new DisLineChart(this);
     Q_CHECK_PTR(overviewLine);
 
-    QChartView *psLine = overviewLine->createPsChart();
+    psLine = overviewLine->createPsChart();
     Q_CHECK_PTR(psLine);
     ui->gridLayout->addWidget(psLine, 0, 5, 1, 10);
 
-    QChartView *memLine = overviewLine->createMemChart();
+    memLine = overviewLine->createMemChart();
     Q_CHECK_PTR(memLine);
     ui->gridLayout->addWidget(memLine, 1, 5, 1, 10);
+
+    taskOverview = new TaskList();
+    Q_CHECK_PTR(taskOverview);
 
     disConnectStatus();
 
@@ -249,4 +253,18 @@ void MainWindow::on_actionclear_triggered()
 {
     overviewLine->psChartClear();
     overviewLine->memChartClear();
+}
+void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    Q_UNUSED(event)
+    if(psChart->underMouse() || psLine->underMouse())
+    {
+        qDebug() << "we need task list!";
+
+        taskOverview->show();
+    }
+    else if(memChart->underMouse() || memLine->underMouse())
+    {
+        qDebug() << "we need detail of memory!";
+    }
 }

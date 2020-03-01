@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QtCharts/QChartView>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -14,6 +15,9 @@ class QTimer;
 class QSpinBox;
 class DisPieChart;
 class DisLineChart;
+class TaskList;
+
+QT_CHARTS_USE_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
@@ -33,10 +37,19 @@ private:
     DisPieChart     *overviewPie;
     DisLineChart    *overviewLine;
 
+    QChartView      *psChart;
+    QChartView      *memChart;
+    QChartView      *psLine;
+    QChartView      *memLine;
+
+    TaskList        *taskOverview;
+
     void    disConnectStatus(void);
     void    refreshTriggerTime(int value);
 
     void    closeEvent(QCloseEvent *event);
+protected:
+    void    mouseDoubleClickEvent(QMouseEvent *event);
 private slots:
     void on_actionconnect_triggered();
     void connectReport(bool status, const QString &errStr);
