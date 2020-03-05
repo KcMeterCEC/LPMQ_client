@@ -55,31 +55,45 @@
 
 QT_BEGIN_NAMESPACE
 class QAbstractItemModel;
-class QLabel;
 class QTreeView;
 QT_END_NAMESPACE
 class QSortFilterProxyModel;
 class FilterWidget;
+class QComboBox;
+class QLineEdit;
+class QSpinBox;
+class Commander;
+class QTimer;
 
 class TaskList : public QWidget
 {
     Q_OBJECT
 
 public:
-    TaskList(QWidget *parent = nullptr);
+    TaskList(QWidget *parent = nullptr, Commander *control = nullptr);
 
-    void setSourceModel(QAbstractItemModel *model);
-
+    void stopExec();
 private slots:
     void textFilterChanged();
     void addTask(QAbstractItemModel *model, const QVector<QString> &in);
+
+    void execTaskList();
+    void triggerValueChanged(int value);
+protected:
+    void closeEvent(QCloseEvent *event);
+    void showEvent(QShowEvent *event);
 private:
+    void setSourceModel(QAbstractItemModel *model);
     void createMailModel();
 
     QSortFilterProxyModel *proxyModel;
     QTreeView *proxyView;
-    QLabel *filterPatternLabel;
     FilterWidget *filterWidget;
+    QComboBox   *focus;
+    QSpinBox    *number;
+    QSpinBox    *trigger;
+    Commander   *cmd;
+    QTimer      *taskTimer;
 };
 
 #endif // TASKLIST_H

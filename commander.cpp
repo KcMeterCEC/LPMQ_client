@@ -159,6 +159,8 @@ bool    Commander::isConnect() const
 
 void    Commander::requestSysInfo(void)
 {
+    if(!hasConnected) return;
+
     head.cmd = CLASS_INFO;
     head.payload_len = 0;
     send2Server();
@@ -217,12 +219,24 @@ void    Commander::execSysInfo(const char *buf)
 
 void    Commander::requestCpuUsage(void)
 {
+    if(!hasConnected) return;
+
     head.cmd = CLASS_PS;
     head.payload_len = ps->requestCpuStat(socketBuf);
     send2Server();
 }
+void    Commander::requestTaskList(task_list_focus focus, quint16 number)
+{
+    if(!hasConnected) return;
+
+    head.cmd = CLASS_PS;
+    head.payload_len = ps->requestTaskList(socketBuf, focus, number);
+    send2Server();
+}
 void    Commander::requestMemUsage(void)
 {
+    if(!hasConnected) return;
+
     head.cmd = CLASS_MEM;
     head.payload_len = memory->requestMemStat(socketBuf);
     send2Server();

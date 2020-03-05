@@ -91,6 +91,17 @@ void    Process::execCpuStat(const QString &ret)
     }
     isCpuStatMore = true;
 }
+quint8  Process::requestTaskList(char *buf, quint16 fcs, quint16 num)
+{
+    buf[0] = TASK_LIST;
+
+    struct TaskListHeader *header = (struct TaskListHeader *)(buf + 1);
+
+    header->focus = fcs;
+    header->number = num;
+
+    return sizeof(struct TaskListHeader) + 1;
+}
 void    Process::execCpuCmd(const char *buf)
 {
     switch(buf[0])
@@ -98,6 +109,10 @@ void    Process::execCpuCmd(const char *buf)
     case CPU_STAT:
     {
         execCpuStat(buf + 1);
+    }break;
+    case TASK_LIST:
+    {
+        qDebug() << "get task list return!";
     }break;
     default:
     {

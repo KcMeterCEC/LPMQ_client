@@ -50,19 +50,52 @@
 
 #include "taskList.h"
 #include "filterwidget.h"
+#include "commander.h"
 
 #include <QtWidgets>
 #include <QVector>
 #include <QSortFilterProxyModel>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QTimer>
+#include <QDebug>
 
-TaskList::TaskList(QWidget *parent): QWidget(parent)
+TaskList::TaskList(QWidget *parent,Commander *control): QWidget(parent),cmd(control)
 {
     proxyModel = new QSortFilterProxyModel(this);
+
+    QLabel *focusLabel = new QLabel(tr("&focus"));
+    Q_CHECK_PTR(focusLabel);
+    focus = new QComboBox(this);
+    Q_CHECK_PTR(focus);
+
+    focus->addItem(tr("CPU"));
+    focus->addItem(tr("Memory"));
+
+    focusLabel->setBuddy(focus);
+
+    number = new QSpinBox(this);
+    Q_CHECK_PTR(number);
+    number->setValue(5);
+    number->setMinimum(5);
+    number->setMaximum(50);
+    number->setPrefix(tr("number "));
+
+    trigger = new QSpinBox(this);
+    Q_CHECK_PTR(trigger);
+    trigger->setValue(5);
+    trigger->setMinimum(1);
+    trigger->setMaximum(60);
+    trigger->setPrefix(tr("period "));
+    trigger->setSuffix(" s");
+    connect(trigger, SIGNAL(valueChanged(int)),
+            this, SLOT(triggerValueChanged(int)));
 
     filterWidget = new FilterWidget;
     connect(filterWidget, &FilterWidget::filterChanged, this, &TaskList::textFilterChanged);
 
-    filterPatternLabel = new QLabel(tr("&Filter pattern:"));
+    QLabel * filterPatternLabel = new QLabel(tr("&process filter:"));
     filterPatternLabel->setBuddy(filterWidget);
 
     connect(filterWidget, &QLineEdit::textChanged,
@@ -76,13 +109,29 @@ TaskList::TaskList(QWidget *parent): QWidget(parent)
     proxyView->sortByColumn(1, Qt::AscendingOrder);
 
     QGridLayout *proxyLayout = new QGridLayout;
-    proxyLayout->addWidget(proxyView, 0, 0, 1, 3);
-    proxyLayout->addWidget(filterPatternLabel, 1, 0);
-    proxyLayout->addWidget(filterWidget, 1, 1);
+
+    proxyLayout->addWidget(focusLabel, 0, 0,1,1);
+    proxyLayout->addWidget(focus, 0, 1,1,1);
+
+    proxyLayout->addWidget(number, 0, 2,1,1);
+
+    proxyLayout->addWidget(trigger, 0, 3,1,1);
+
+    proxyLayout->addWidget(filterPatternLabel, 0, 4,1,1);
+    proxyLayout->addWidget(filterWidget, 0, 5, 1, 1);
+
+    proxyLayout->addWidget(proxyView, 1, 0, 6, 7);
+
+    taskTimer = new QTimer(this);
+    Q_CHECK_PTR(taskTimer);
+    connect(taskTimer, &QTimer::timeout,
+            this, &TaskList::execTaskList);
+
 
     setLayout(proxyLayout);
 
     setWindowTitle(tr("task list"));
+    setWindowIcon(QIcon(":/images/images/task.png"));
     resize(500, 450);
 
     createMailModel();
@@ -148,4 +197,33 @@ void TaskList::textFilterChanged()
                    filterWidget->caseSensitivity(),
                    filterWidget->patternSyntax());
     proxyModel->setFilterRegExp(regExp);
+}
+void TaskList::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event)
+
+    taskTimer->start(trigger->value() * 1000);
+}
+void TaskList::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event)
+    taskTimer->stop();
+}
+void TaskList::execTaskList()
+{
+    task_list_focus fcs = FOCUS_CPU;
+    if(focus->currentText() == "Memory")
+    {
+        fcs = FOCUS_MEM;
+    }
+
+    cmd->requestTaskList(fcs, number->value());
+}
+void TaskList::stopExec()
+{
+    taskTimer->stop();
+}
+void TaskList::triggerValueChanged(int value)
+{
+    taskTimer->setInterval(value * 1000);
 }

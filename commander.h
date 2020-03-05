@@ -27,6 +27,13 @@ typedef enum
     CMD_FILE_READ_ERR,
 }cmd_status;
 
+typedef enum
+{
+    FOCUS_CPU,
+    FOCUS_MEM,
+    FOCUS_IO,
+}task_list_focus;
+
 #ifdef _MSC_VER
 #pragma pack(push,1)
 #endif
@@ -55,7 +62,9 @@ public:
     bool    isConnect() const;
 
     void    requestSysInfo(void);
+
     void    requestCpuUsage(void);
+    void    requestTaskList(task_list_focus focus, quint16 number);
 
     void    requestMemUsage(void);
 private:

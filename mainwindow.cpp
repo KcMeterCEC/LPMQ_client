@@ -90,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
     Q_CHECK_PTR(memLine);
     ui->gridLayout->addWidget(memLine, 1, 5, 1, 10);
 
-    taskOverview = new TaskList();
+    taskOverview = new TaskList(nullptr, cmd);
     Q_CHECK_PTR(taskOverview);
 
     disConnectStatus();
@@ -184,6 +184,7 @@ void    MainWindow::disConnectStatus(void)
         connectLab->setStyleSheet("color: rgb(255, 0, 0);");
 
         overviewTimer->stop();
+        taskOverview->stopExec();
     }
 }
 void MainWindow::connectReport(bool status, const QString &errStr)
