@@ -71,7 +71,7 @@ private:
     QTcpSocket          *socket = nullptr;
     bool                hasConnected = false;
     Header              head;
-    char                socketBuf[16384];
+    char                socketBuf[40960];
     Rb                  *recvBuf;
     enum
     {

@@ -147,6 +147,7 @@ void TaskList::addTask(QAbstractItemModel *model, const QVector<QString> &in)
     model->setData(model->index(0, 5), in[5]);
     model->setData(model->index(0, 6), in[6]);
     model->setData(model->index(0, 7), in[7]);
+
 }
 
 void TaskList::createMailModel()
