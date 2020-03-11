@@ -184,7 +184,6 @@ void    MainWindow::disConnectStatus(void)
         connectLab->setStyleSheet("color: rgb(255, 0, 0);");
 
         overviewTimer->stop();
-        taskOverview->stopExec();
     }
 }
 void MainWindow::connectReport(bool status, const QString &errStr)
@@ -226,6 +225,7 @@ void MainWindow::execOverview()
 {
     cmd->requestCpuUsage();
     cmd->requestMemUsage();
+    taskOverview->execTaskList();
 }
 void MainWindow::refreshTriggerTime(int value)
 {

@@ -31,6 +31,8 @@ Commander::Commander(QObject *parent) : QObject(parent),status(GET_HEAD)
 
     connect(ps, SIGNAL(resultCpuUsage(const QMap<QString, double> &)),
             this, SIGNAL(psResultCpuUsage(const QMap<QString, double> &)));
+    connect(ps, &Process::resultTaskList,
+            this, &Commander::psResultTaskList);
 
     memory = new Mem(this);
     Q_CHECK_PTR(memory);
@@ -125,17 +127,14 @@ void    Commander::recvSlot(void)
                 {
                 case CLASS_INFO:
                 {
-                    qDebug() << "get CLASS_INFO";
                     execSysInfo(socketBuf);
                 }break;
                 case CLASS_PS:
                 {
-                    qDebug() << "get CLASS_PS";
                     ps->execCpuCmd(socketBuf);
                 }break;
                 case CLASS_MEM:
                 {
-                    qDebug() << "get CLASS_MEM";
                     memory->execMemCmd(socketBuf);
                 }break;
                 case CLASS_IO:
@@ -180,7 +179,7 @@ bool    Commander::send2Server(void)
     }
     if(head.payload_len)
     {
-        if(socket->write(socketBuf, head.payload_len) == -1)
+        if(socket->write(sendBuf, head.payload_len) == -1)
         {
             qCritical() << "can't write data to server!";
             return false;
@@ -222,7 +221,7 @@ void    Commander::requestCpuUsage(void)
     if(!hasConnected) return;
 
     head.cmd = CLASS_PS;
-    head.payload_len = ps->requestCpuStat(socketBuf);
+    head.payload_len = ps->requestCpuStat(sendBuf);
     send2Server();
 }
 void    Commander::requestTaskList(task_list_focus focus, quint16 number)
@@ -230,7 +229,7 @@ void    Commander::requestTaskList(task_list_focus focus, quint16 number)
     if(!hasConnected) return;
 
     head.cmd = CLASS_PS;
-    head.payload_len = ps->requestTaskList(socketBuf, focus, number);
+    head.payload_len = ps->requestTaskList(sendBuf, focus, number);
     send2Server();
 }
 void    Commander::requestMemUsage(void)
@@ -238,6 +237,6 @@ void    Commander::requestMemUsage(void)
     if(!hasConnected) return;
 
     head.cmd = CLASS_MEM;
-    head.payload_len = memory->requestMemStat(socketBuf);
+    head.payload_len = memory->requestMemStat(sendBuf);
     send2Server();
 }

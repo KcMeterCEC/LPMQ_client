@@ -72,6 +72,7 @@ private:
     bool                hasConnected = false;
     Header              head;
     char                socketBuf[40960];
+    char                sendBuf[1024];
     Rb                  *recvBuf;
     enum
     {
@@ -94,6 +95,7 @@ signals:
 
     void    resultSysInfo(const QMap<QString, QString> &info);
     void    psResultCpuUsage(const QMap<QString, double> &info);
+    void    psResultTaskList(const QVector<QMap<QString, QString>> &info);
 
     void    memResultMemUsage(const QMap<QString, qulonglong> &info);
 };

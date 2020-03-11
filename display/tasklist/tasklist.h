@@ -54,6 +54,7 @@
 #include <QWidget>
 
 QT_BEGIN_NAMESPACE
+class QStandardItemModel;
 class QAbstractItemModel;
 class QTreeView;
 QT_END_NAMESPACE
@@ -63,7 +64,6 @@ class QComboBox;
 class QLineEdit;
 class QSpinBox;
 class Commander;
-class QTimer;
 
 class TaskList : public QWidget
 {
@@ -72,28 +72,25 @@ class TaskList : public QWidget
 public:
     TaskList(QWidget *parent = nullptr, Commander *control = nullptr);
 
-    void stopExec();
+    void execTaskList();
 private slots:
     void textFilterChanged();
-    void addTask(QAbstractItemModel *model, const QVector<QString> &in);
 
-    void execTaskList();
-    void triggerValueChanged(int value);
+    void disTaskList(const QVector<QMap<QString, QString>> &info);
 protected:
     void closeEvent(QCloseEvent *event);
     void showEvent(QShowEvent *event);
 private:
     void setSourceModel(QAbstractItemModel *model);
-    void createMailModel();
+    void createTaskModel();
 
     QSortFilterProxyModel *proxyModel;
     QTreeView *proxyView;
     FilterWidget *filterWidget;
     QComboBox   *focus;
     QSpinBox    *number;
-    QSpinBox    *trigger;
     Commander   *cmd;
-    QTimer      *taskTimer;
+    QStandardItemModel *model;
 };
 
 #endif // TASKLIST_H

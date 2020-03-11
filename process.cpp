@@ -109,20 +109,18 @@ void    Process::execCpuList(const char *buf)
     struct TaskOverview *taskList = (struct TaskOverview *)(buf + sizeof(struct TaskListHeader));
 
     QVector<QMap<QString, QString>> result;
-    for(int i = 0; i < head->number; ++i)
+    for(int i = head->number - 1; i >= 0; --i)
     {
         QMap<QString, QString> info;
 
         info["name"] = QString(taskList[i].name);
         info["pid"] = QString("%1").arg(taskList[i].id.pid);
-        info["state"] = QString(taskList[i].stat.state);
+        info["state"] = QString("%1").arg(taskList[i].stat.state);
         info["priority"] = QString("%1").arg(taskList[i].policy.priority);
         info["nice"] = QString("%1").arg(taskList[i].policy.nice);
         info["threads"] = QString("%1").arg(taskList[i].policy.threads);
         info["cpu"] = QString("%1").arg(taskList[i].policy.processor);
-        info["rss"] = QString("%1").arg(taskList[i].mem.rss);
-
-        qDebug() << "id " << taskList[i].id.pid << " rss " << taskList[i].mem.rss;
+        info["rss"] = QString("%1").arg((double)taskList[i].mem.rss / 1024);
 
         result.push_back(info);
     }
