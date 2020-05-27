@@ -160,11 +160,13 @@ void    Commander::requestSysInfo(void)
 {
     if(!hasConnected) return;
 
-    head.cmd = CLASS_INFO;
-    head.payload_len = 0;
-    send2Server();
+    Header sendHead;
+
+    sendHead.cmd = CLASS_INFO;
+    sendHead.payload_len = 0;
+    send2Server(sendHead);
 }
-bool    Commander::send2Server(void)
+bool    Commander::send2Server(Header &sendHead)
 {
     if(!hasConnected)
     {
@@ -172,14 +174,14 @@ bool    Commander::send2Server(void)
         return false;
     }
 
-    if(socket->write((const char *)&head, sizeof(Header)) == -1)
+    if(socket->write((const char *)&sendHead, sizeof(Header)) == -1)
     {
         qCritical() << "can't write data to server!";
         return false;
     }
-    if(head.payload_len)
+    if(sendHead.payload_len)
     {
-        if(socket->write(sendBuf, head.payload_len) == -1)
+        if(socket->write(sendBuf, sendHead.payload_len) == -1)
         {
             qCritical() << "can't write data to server!";
             return false;
@@ -219,24 +221,25 @@ void    Commander::execSysInfo(const char *buf)
 void    Commander::requestCpuUsage(void)
 {
     if(!hasConnected) return;
-
-    head.cmd = CLASS_PS;
-    head.payload_len = ps->requestCpuStat(sendBuf);
-    send2Server();
+    Header sendHead;
+    sendHead.cmd = CLASS_PS;
+    sendHead.payload_len = ps->requestCpuStat(sendBuf);
+    send2Server(sendHead);
 }
 void    Commander::requestTaskList(task_list_focus focus, quint16 number)
 {
     if(!hasConnected) return;
-
-    head.cmd = CLASS_PS;
-    head.payload_len = ps->requestTaskList(sendBuf, focus, number);
-    send2Server();
+    Header sendHead;
+    sendHead.cmd = CLASS_PS;
+    sendHead.payload_len = ps->requestTaskList(sendBuf, focus, number);
+    send2Server(sendHead);
 }
 void    Commander::requestMemUsage(void)
 {
     if(!hasConnected) return;
+    Header sendHead;
 
-    head.cmd = CLASS_MEM;
-    head.payload_len = memory->requestMemStat(sendBuf);
-    send2Server();
+    sendHead.cmd = CLASS_MEM;
+    sendHead.payload_len = memory->requestMemStat(sendBuf);
+    send2Server(sendHead);
 }

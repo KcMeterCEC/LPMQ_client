@@ -39,10 +39,10 @@ typedef enum
 #endif
 struct Header
 {
-    std::uint8_t        ck;
-    std::uint8_t        cmd;
-    std::int16_t        status;
-    std::uint16_t       payload_len;
+    std::uint8_t        ck = HEAD_CK;
+    std::uint8_t        cmd = CLASS_INFO;
+    std::int16_t        status = CMD_OK;
+    std::uint16_t       payload_len = 0;
 #ifdef _MSC_VER
 };
 #pragma pack(pop)
@@ -83,7 +83,7 @@ private:
     Process             *ps;
     Mem                 *memory;
 
-    bool    send2Server(void);
+    bool    send2Server(Header &sendHead);
 
     void    execSysInfo(const char *buf);
 private slots:

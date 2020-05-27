@@ -32,14 +32,14 @@ MainWindow::MainWindow(QWidget *parent)
     cmd = new Commander(this);
     Q_CHECK_PTR(cmd);
 
-    connect(cmd, SIGNAL(connectStatus(bool, const QString &)),
-            this, SLOT(connectReport(bool, const QString &)));
+    connect(cmd, &Commander::connectStatus,
+            this, &MainWindow::connectReport);
 
-    connect(cmd, SIGNAL(resultSysInfo(const QMap<QString, QString> &)),
-            this, SLOT(showSysInfo(const QMap<QString, QString> &)));
+    connect(cmd, &Commander::resultSysInfo,
+            this, &MainWindow::showSysInfo);
 
-    connect(cmd, SIGNAL(psResultCpuUsage(const QMap<QString, double> &)),
-            this, SLOT(showCpuUsage(const QMap<QString, double> &)));
+    connect(cmd, &Commander::psResultCpuUsage,
+            this, &MainWindow::showCpuUsage);
 
     connect(cmd, &Commander::memResultMemUsage,
             this, &MainWindow::showMemUsage);
@@ -56,8 +56,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     overviewTimer = new QTimer(this);
     Q_CHECK_PTR(overviewTimer);
-    connect(overviewTimer, SIGNAL(timeout()),
-            this, SLOT(execOverview()));
+    connect(overviewTimer, &QTimer::timeout,
+            this, &MainWindow::execOverview);
 
     timeAdj = new QSpinBox(this);
     Q_CHECK_PTR(timeAdj);
@@ -66,8 +66,8 @@ MainWindow::MainWindow(QWidget *parent)
     timeAdj->setMaximum(60);
     timeAdj->setPrefix(tr("period "));
     timeAdj->setSuffix(" s");
-    connect(timeAdj, SIGNAL(valueChanged(int)),
-            this, SLOT(triggerValueChanged(int)));
+    connect(timeAdj, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &MainWindow::triggerValueChanged);
     ui->toolBar->addWidget(timeAdj);
 
     overviewPie = new DisPieChart(this);
@@ -146,8 +146,8 @@ void MainWindow::on_actionconnect_triggered()
                                    Qt::Horizontal, &conDialog);
         layout.addRow(&buttonBox);
 
-        QObject::connect(&buttonBox, SIGNAL(accepted()), &conDialog, SLOT(accept()));
-        QObject::connect(&buttonBox, SIGNAL(rejected()), &conDialog, SLOT(reject()));
+        QObject::connect(&buttonBox, &QDialogButtonBox::accepted, &conDialog, &QDialog::accept);
+        QObject::connect(&buttonBox, &QDialogButtonBox::rejected, &conDialog, &QDialog::reject);
 
         if(conDialog.exec() == QDialog::Accepted)
         {
@@ -198,6 +198,7 @@ void MainWindow::connectReport(bool status, const QString &errStr)
     }
     else
     {
+        qDebug() << "err " << errStr;
         QMessageBox::warning(this,
                              tr("connection error"),
                              errStr,
