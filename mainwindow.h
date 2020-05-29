@@ -16,6 +16,7 @@ class QSpinBox;
 class DisPieChart;
 class DisLineChart;
 class TaskList;
+class LineChartView;
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -26,28 +27,6 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
-private:
-    Commander       *cmd = nullptr;
-    QLabel          *connectLab = nullptr;
-    QLabel          *sysInfoStatus;
-    QSettings       *userCfg;
-    QTimer          *overviewTimer;
-    QSpinBox        *timeAdj;
-    DisPieChart     *overviewPie;
-    DisLineChart    *overviewLine;
-
-    QChartView      *psChart;
-    QChartView      *memChart;
-    QChartView      *psLine;
-    QChartView      *memLine;
-
-    TaskList        *taskOverview;
-
-    void    disConnectStatus(void);
-    void    refreshTriggerTime(int value);
-
-    void    closeEvent(QCloseEvent *event);
 protected:
     void    mouseDoubleClickEvent(QMouseEvent *event);
 private slots:
@@ -65,6 +44,26 @@ private slots:
     void on_actionclear_triggered();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow  *ui;
+    Commander       *cmd = nullptr;
+    QLabel          *connectLab = nullptr;
+    QLabel          *sysInfoStatus = nullptr;
+    QSettings       *userCfg = nullptr;
+    QTimer          *overviewTimer = nullptr;
+    QSpinBox        *timeAdj = nullptr;
+    DisPieChart     *overviewPie = nullptr;
+    DisLineChart    *overviewLine = nullptr;
+    LineChartView   *psLineChart;
+
+    QChartView      *psChart = nullptr;
+    QChartView      *memChart = nullptr;
+    QChartView      *memLine = nullptr;
+
+    TaskList        *taskOverview = nullptr;
+
+    void    disConnectStatus(void);
+    void    refreshTriggerTime(int value);
+
+    void    closeEvent(QCloseEvent *event);
 };
 #endif // MAINWINDOW_H

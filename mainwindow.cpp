@@ -19,6 +19,7 @@
 #include "display/donutbreakdown/dispiechart.h"
 #include "display/multiline/dislinechart.h"
 #include "display/tasklist/tasklist.h"
+#include "display/linechart/linechartview.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -82,9 +83,8 @@ MainWindow::MainWindow(QWidget *parent)
     overviewLine = new DisLineChart(this);
     Q_CHECK_PTR(overviewLine);
 
-    psLine = overviewLine->createPsChart();
-    Q_CHECK_PTR(psLine);
-    ui->gridLayout->addWidget(psLine, 0, 5, 1, 10);
+    psLineChart = new LineChartView(this, "cpus' usage");
+    ui->gridLayout->addWidget(psLineChart, 0, 5, 1, 10);
 
     memLine = overviewLine->createMemChart();
     Q_CHECK_PTR(memLine);
@@ -238,11 +238,9 @@ void MainWindow::triggerValueChanged(int value)
 }
 void  MainWindow::showCpuUsage(const QMap<QString, double> &info)
 {
-    if(!overviewLine->psLineCreated())
-    {
-        overviewLine->insertPsChart(info.value("cpu count"));
-    }
-    overviewLine->refreshPsChart(info);
+    psLineChart->setNumOfLine(info.value("cpu count"), "cpu");
+
+//    overviewLine->refreshPsChart(info);
     overviewPie->refreshPsChart(info);
 }
 void MainWindow::showMemUsage(const QMap<QString, qulonglong> &info)
@@ -253,20 +251,20 @@ void MainWindow::showMemUsage(const QMap<QString, qulonglong> &info)
 
 void MainWindow::on_actionclear_triggered()
 {
-    overviewLine->psChartClear();
+    psLineChart->clearLinesData();
     overviewLine->memChartClear();
 }
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {
     Q_UNUSED(event)
-    if(psChart->underMouse() || psLine->underMouse())
-    {
-        qDebug() << "we need task list!";
+//    if(psChart->underMouse() || psLine->underMouse())
+//    {
+//        qDebug() << "we need task list!";
 
-        taskOverview->show();
-    }
-    else if(memChart->underMouse() || memLine->underMouse())
-    {
-        qDebug() << "we need detail of memory!";
-    }
+//        taskOverview->show();
+//    }
+//    else if(memChart->underMouse() || memLine->underMouse())
+//    {
+//        qDebug() << "we need detail of memory!";
+//    }
 }
