@@ -22,7 +22,11 @@ SOURCES += \
     display/donutbreakdown/dispiechart.cpp \
     display/donutbreakdown/donutbreakdownchart.cpp \
     display/donutbreakdown/mainslice.cpp \
-    display/multiline/dislinechart.cpp \
+    display/linechart/linechart.cpp \
+    display/linechart/linechartview.cpp \
+    display/linechart/markerline.cpp \
+    display/tasklist/filterwidget.cpp \
+    display/tasklist/tasklist.cpp \
     main.cpp \
     mainwindow.cpp \
     mem.cpp \
@@ -34,7 +38,11 @@ HEADERS += \
     display/donutbreakdown/dispiechart.h \
     display/donutbreakdown/donutbreakdownchart.h \
     display/donutbreakdown/mainslice.h \
-    display/multiline/dislinechart.h \
+    display/linechart/linechart.h \
+    display/linechart/linechartview.h \
+    display/linechart/markerline.h \
+    display/tasklist/filterwidget.h \
+    display/tasklist/tasklist.h \
     mainwindow.h \
     mem.h \
     rb.h \

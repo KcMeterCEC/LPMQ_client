@@ -2,10 +2,11 @@
 #include <QDebug>
 #include <QMap>
 #include <QString>
+#include <QVector>
 
 Process::Process(QObject *parent) : QObject(parent)
 {
-
+    qDebug() << "sizeof(struct TaskOverview) " << sizeof(struct TaskOverview);
 }
 quint8 Process::requestCpuStat(char *buf)
 {
@@ -91,6 +92,41 @@ void    Process::execCpuStat(const QString &ret)
     }
     isCpuStatMore = true;
 }
+quint8  Process::requestTaskList(char *buf, quint16 fcs, quint16 num)
+{
+    buf[0] = TASK_LIST;
+
+    struct TaskListHeader *header = (struct TaskListHeader *)(buf + 1);
+
+    header->focus = fcs;
+    header->number = num;
+
+    return sizeof(struct TaskListHeader) + 1;
+}
+void    Process::execCpuList(const char *buf)
+{
+    struct TaskListHeader *head = (struct TaskListHeader *)buf;
+    struct TaskOverview *taskList = (struct TaskOverview *)(buf + sizeof(struct TaskListHeader));
+
+    QVector<QMap<QString, QString>> result;
+    for(int i = head->number - 1; i >= 0; --i)
+    {
+        QMap<QString, QString> info;
+
+        info["name"] = QString(taskList[i].name);
+        info["pid"] = QString("%1").arg(taskList[i].id.pid);
+        info["state"] = QString("%1").arg(taskList[i].stat.state);
+        info["priority"] = QString("%1").arg(taskList[i].policy.priority);
+        info["nice"] = QString("%1").arg(taskList[i].policy.nice);
+        info["threads"] = QString("%1").arg(taskList[i].policy.threads);
+        info["cpu"] = QString("%1").arg(taskList[i].policy.processor);
+        info["rss"] = QString("%1").arg((double)taskList[i].mem.rss / 1024);
+
+        result.push_back(info);
+    }
+
+    emit resultTaskList(result);
+}
 void    Process::execCpuCmd(const char *buf)
 {
     switch(buf[0])
@@ -98,6 +134,10 @@ void    Process::execCpuCmd(const char *buf)
     case CPU_STAT:
     {
         execCpuStat(buf + 1);
+    }break;
+    case TASK_LIST:
+    {
+        execCpuList(buf + 1);
     }break;
     default:
     {

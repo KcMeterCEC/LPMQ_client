@@ -13,11 +13,12 @@
 #include <QTimer>
 #include <QSpinBox>
 #include <QGridLayout>
-#include <QtCharts/QChartView>
+#include <QMouseEvent>
 
 #include "commander.h"
 #include "display/donutbreakdown/dispiechart.h"
-#include "display/multiline/dislinechart.h"
+#include "display/tasklist/tasklist.h"
+#include "display/linechart/linechartview.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -31,14 +32,14 @@ MainWindow::MainWindow(QWidget *parent)
     cmd = new Commander(this);
     Q_CHECK_PTR(cmd);
 
-    connect(cmd, SIGNAL(connectStatus(bool, const QString &)),
-            this, SLOT(connectReport(bool, const QString &)));
+    connect(cmd, &Commander::connectStatus,
+            this, &MainWindow::connectReport);
 
-    connect(cmd, SIGNAL(resultSysInfo(const QMap<QString, QString> &)),
-            this, SLOT(showSysInfo(const QMap<QString, QString> &)));
+    connect(cmd, &Commander::resultSysInfo,
+            this, &MainWindow::showSysInfo);
 
-    connect(cmd, SIGNAL(psResultCpuUsage(const QMap<QString, double> &)),
-            this, SLOT(showCpuUsage(const QMap<QString, double> &)));
+    connect(cmd, &Commander::psResultCpuUsage,
+            this, &MainWindow::showCpuUsage);
 
     connect(cmd, &Commander::memResultMemUsage,
             this, &MainWindow::showMemUsage);
@@ -55,8 +56,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     overviewTimer = new QTimer(this);
     Q_CHECK_PTR(overviewTimer);
-    connect(overviewTimer, SIGNAL(timeout()),
-            this, SLOT(execOverview()));
+    connect(overviewTimer, &QTimer::timeout,
+            this, &MainWindow::execOverview);
 
     timeAdj = new QSpinBox(this);
     Q_CHECK_PTR(timeAdj);
@@ -65,29 +66,33 @@ MainWindow::MainWindow(QWidget *parent)
     timeAdj->setMaximum(60);
     timeAdj->setPrefix(tr("period "));
     timeAdj->setSuffix(" s");
-    connect(timeAdj, SIGNAL(valueChanged(int)),
-            this, SLOT(triggerValueChanged(int)));
+    connect(timeAdj, QOverload<int>::of(&QSpinBox::valueChanged),
+            this, &MainWindow::triggerValueChanged);
     ui->toolBar->addWidget(timeAdj);
 
     overviewPie = new DisPieChart(this);
     Q_CHECK_PTR(overviewPie);
 
-    QChartView *psChart = overviewPie->createPsChart();
-    QChartView *memChart = overviewPie->createMemChart();
+    psChart = overviewPie->createPsChart();
+    memChart = overviewPie->createMemChart();
 
     ui->gridLayout->addWidget(psChart, 0, 0, 1, 5);
     ui->gridLayout->addWidget(memChart, 1, 0, 1, 5);
 
-    overviewLine = new DisLineChart(this);
-    Q_CHECK_PTR(overviewLine);
+    psLineChart = new LineChartView(this, "history usage of cpu");
+    psLineChart->setDisCount(100);
+    ui->gridLayout->addWidget(psLineChart, 0, 5, 1, 10);
 
-    QChartView *psLine = overviewLine->createPsChart();
-    Q_CHECK_PTR(psLine);
-    ui->gridLayout->addWidget(psLine, 0, 5, 1, 10);
+    memLineChart = new LineChartView(this, "history usage of memory(MB)");
+    memLineChart->setDisCount(100);
 
-    QChartView *memLine = overviewLine->createMemChart();
-    Q_CHECK_PTR(memLine);
-    ui->gridLayout->addWidget(memLine, 1, 5, 1, 10);
+    QVector<QString> name = {"used", "buffers", "cached", "free"};
+
+    memLineChart->setNumOfLine(name.size(), name, LineChartView::AREA);
+    ui->gridLayout->addWidget(memLineChart, 1, 5, 1, 10);
+
+    taskOverview = new TaskList(nullptr, cmd);
+    Q_CHECK_PTR(taskOverview);
 
     disConnectStatus();
 
@@ -142,8 +147,8 @@ void MainWindow::on_actionconnect_triggered()
                                    Qt::Horizontal, &conDialog);
         layout.addRow(&buttonBox);
 
-        QObject::connect(&buttonBox, SIGNAL(accepted()), &conDialog, SLOT(accept()));
-        QObject::connect(&buttonBox, SIGNAL(rejected()), &conDialog, SLOT(reject()));
+        QObject::connect(&buttonBox, &QDialogButtonBox::accepted, &conDialog, &QDialog::accept);
+        QObject::connect(&buttonBox, &QDialogButtonBox::rejected, &conDialog, &QDialog::reject);
 
         if(conDialog.exec() == QDialog::Accepted)
         {
@@ -194,6 +199,7 @@ void MainWindow::connectReport(bool status, const QString &errStr)
     }
     else
     {
+        qDebug() << "err " << errStr;
         QMessageBox::warning(this,
                              tr("connection error"),
                              errStr,
@@ -219,8 +225,11 @@ void  MainWindow::showSysInfo(const QMap<QString, QString> &info)
 }
 void MainWindow::execOverview()
 {
+    currentSec += timeAdj->value();
+
     cmd->requestCpuUsage();
     cmd->requestMemUsage();
+    taskOverview->execTaskList();
 }
 void MainWindow::refreshTriggerTime(int value)
 {
@@ -230,23 +239,69 @@ void MainWindow::triggerValueChanged(int value)
 {
     refreshTriggerTime(value);
 }
+void  MainWindow::refreshCpuUsage(const QMap<QString, double> &info)
+{
+    QVector<QVector<QPointF>> usage;
+
+    usage.resize(info.value("cpu count"));
+    for(int i = 0; i < usage.size(); ++i)
+    {
+        usage[i].push_back(QPointF(currentSec, info.value(QString("cpu%1.usage").arg(i))));
+    }
+    psLineChart->saveLinesData(usage);
+}
+void  MainWindow::refreshMemUsage(const QMap<QString, qulonglong> &info)
+{
+    QVector<QVector<QPointF>> usage;
+    usage.resize(4);
+
+    usage[0].push_back(QPointF(currentSec, info.value("mem.used")));
+    usage[1].push_back(QPointF(currentSec,
+    info.value("mem.used") + info.value("mem.buffers")));
+    usage[2].push_back(QPointF(currentSec,
+    info.value("mem.used") + info.value("mem.buffers") + info.value("mem.cache")));
+    usage[3].push_back(QPointF(currentSec,
+    info.value("mem.total")));
+
+    memLineChart->saveLinesData(usage);
+}
 void  MainWindow::showCpuUsage(const QMap<QString, double> &info)
 {
-    if(!overviewLine->psLineCreated())
+    QVector<QString> name;
+
+    name.resize(info.value("cpu count"));
+    for(int i = 0; i < name.size(); ++i)
     {
-        overviewLine->insertPsChart(info.value("cpu count"));
+        name[i] = QString("cpu%1").arg(i);
     }
-    overviewLine->refreshPsChart(info);
+    psLineChart->setNumOfLine(name.size(), name);
+
+    refreshCpuUsage(info);
     overviewPie->refreshPsChart(info);
+
 }
 void MainWindow::showMemUsage(const QMap<QString, qulonglong> &info)
 {
-    qDebug() << "total " << info.value("mem.total");
-    qDebug() << "free " << info.value("mem.free");
-    qDebug() << "buffers " << info.value("mem.buffers");
-    qDebug() << "cache " << info.value("mem.cache");
-    qDebug() << "used " << info.value("mem.used");
-
     overviewPie->refreshMemChart(info);
-    overviewLine->refreshMemChart(info);
+    refreshMemUsage(info);
+}
+
+void MainWindow::on_actionclear_triggered()
+{
+    psLineChart->clearLinesData();
+    memLineChart->clearLinesData();
+}
+void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    Q_UNUSED(event)
+//    if(psChart->underMouse() || psLine->underMouse())
+//    {
+//        qDebug() << "we need task list!";
+
+//        taskOverview->show();
+//    }
+//    else if(memChart->underMouse() || memLine->underMouse())
+//    {
+//        qDebug() << "we need detail of memory!";
+//    }
 }

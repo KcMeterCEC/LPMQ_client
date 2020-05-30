@@ -31,6 +31,8 @@ Commander::Commander(QObject *parent) : QObject(parent),status(GET_HEAD)
 
     connect(ps, SIGNAL(resultCpuUsage(const QMap<QString, double> &)),
             this, SIGNAL(psResultCpuUsage(const QMap<QString, double> &)));
+    connect(ps, &Process::resultTaskList,
+            this, &Commander::psResultTaskList);
 
     memory = new Mem(this);
     Q_CHECK_PTR(memory);
@@ -96,7 +98,14 @@ void    Commander::recvSlot(void)
             {
                 if(head.ck == HEAD_CK)
                 {
-                    status = GET_CONTENTS;
+                    if(head.status == CMD_OK)
+                    {
+                        status = GET_CONTENTS;
+                    }
+                    else
+                    {
+                        qDebug() << "something is wrong : " << head.status;
+                    }
                 }
                 else
                 {
@@ -118,17 +127,14 @@ void    Commander::recvSlot(void)
                 {
                 case CLASS_INFO:
                 {
-                    qDebug() << "get CLASS_INFO";
                     execSysInfo(socketBuf);
                 }break;
                 case CLASS_PS:
                 {
-                    qDebug() << "get CLASS_PS";
                     ps->execCpuCmd(socketBuf);
                 }break;
                 case CLASS_MEM:
                 {
-                    qDebug() << "get CLASS_MEM";
                     memory->execMemCmd(socketBuf);
                 }break;
                 case CLASS_IO:
@@ -152,11 +158,15 @@ bool    Commander::isConnect() const
 
 void    Commander::requestSysInfo(void)
 {
-    head.cmd = CLASS_INFO;
-    head.payload_len = 0;
-    send2Server();
+    if(!hasConnected) return;
+
+    Header sendHead;
+
+    sendHead.cmd = CLASS_INFO;
+    sendHead.payload_len = 0;
+    send2Server(sendHead);
 }
-bool    Commander::send2Server(void)
+bool    Commander::send2Server(Header &sendHead)
 {
     if(!hasConnected)
     {
@@ -164,14 +174,14 @@ bool    Commander::send2Server(void)
         return false;
     }
 
-    if(socket->write((const char *)&head, sizeof(Header)) == -1)
+    if(socket->write((const char *)&sendHead, sizeof(Header)) == -1)
     {
         qCritical() << "can't write data to server!";
         return false;
     }
-    if(head.payload_len)
+    if(sendHead.payload_len)
     {
-        if(socket->write(socketBuf, head.payload_len) == -1)
+        if(socket->write(sendBuf, sendHead.payload_len) == -1)
         {
             qCritical() << "can't write data to server!";
             return false;
@@ -210,13 +220,26 @@ void    Commander::execSysInfo(const char *buf)
 
 void    Commander::requestCpuUsage(void)
 {
-    head.cmd = CLASS_PS;
-    head.payload_len = ps->requestCpuStat(socketBuf);
-    send2Server();
+    if(!hasConnected) return;
+    Header sendHead;
+    sendHead.cmd = CLASS_PS;
+    sendHead.payload_len = ps->requestCpuStat(sendBuf);
+    send2Server(sendHead);
+}
+void    Commander::requestTaskList(task_list_focus focus, quint16 number)
+{
+    if(!hasConnected) return;
+    Header sendHead;
+    sendHead.cmd = CLASS_PS;
+    sendHead.payload_len = ps->requestTaskList(sendBuf, focus, number);
+    send2Server(sendHead);
 }
 void    Commander::requestMemUsage(void)
 {
-    head.cmd = CLASS_MEM;
-    head.payload_len = memory->requestMemStat(socketBuf);
-    send2Server();
+    if(!hasConnected) return;
+    Header sendHead;
+
+    sendHead.cmd = CLASS_MEM;
+    sendHead.payload_len = memory->requestMemStat(sendBuf);
+    send2Server(sendHead);
 }

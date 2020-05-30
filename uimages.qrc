@@ -3,5 +3,8 @@
         <file>images/link.png</file>
         <file>images/unlink.png</file>
         <file>images/monitor.png</file>
+        <file>images/clear.png</file>
+        <file>images/find.png</file>
+        <file>images/task.png</file>
     </qresource>
 </RCC>

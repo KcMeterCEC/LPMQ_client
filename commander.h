@@ -24,15 +24,31 @@ typedef enum
 {
     CMD_OK,
     CMD_NO_FILE,
+    CMD_FILE_READ_ERR,
 }cmd_status;
 
+typedef enum
+{
+    FOCUS_CPU,
+    FOCUS_MEM,
+    FOCUS_IO,
+}task_list_focus;
+
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#endif
 struct Header
 {
-    std::uint8_t        ck;
-    std::uint8_t        cmd;
-    std::int16_t        status;
-    std::uint16_t       payload_len;
+    std::uint8_t        ck = HEAD_CK;
+    std::uint8_t        cmd = CLASS_INFO;
+    std::int16_t        status = CMD_OK;
+    std::uint16_t       payload_len = 0;
+#ifdef _MSC_VER
 };
+#pragma pack(pop)
+#else
+} __attribute__((__packed__));
+#endif
 
 class Commander : public QObject
 {
@@ -46,14 +62,17 @@ public:
     bool    isConnect() const;
 
     void    requestSysInfo(void);
+
     void    requestCpuUsage(void);
+    void    requestTaskList(task_list_focus focus, quint16 number);
 
     void    requestMemUsage(void);
 private:
     QTcpSocket          *socket = nullptr;
     bool                hasConnected = false;
     Header              head;
-    char                socketBuf[16384];
+    char                socketBuf[40960];
+    char                sendBuf[1024];
     Rb                  *recvBuf;
     enum
     {
@@ -64,7 +83,7 @@ private:
     Process             *ps;
     Mem                 *memory;
 
-    bool    send2Server(void);
+    bool    send2Server(Header &sendHead);
 
     void    execSysInfo(const char *buf);
 private slots:
@@ -76,6 +95,7 @@ signals:
 
     void    resultSysInfo(const QMap<QString, QString> &info);
     void    psResultCpuUsage(const QMap<QString, double> &info);
+    void    psResultTaskList(const QVector<QMap<QString, QString>> &info);
 
     void    memResultMemUsage(const QMap<QString, qulonglong> &info);
 };
