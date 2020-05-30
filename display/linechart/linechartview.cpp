@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QMouseEvent>
 #include <QLegendMarker>
+#include <QAreaSeries>
 
 #include "linechartview.h"
 #include "linechart.h"
@@ -16,9 +17,12 @@ LineChartView::LineChartView(QWidget *parent, const QString &title):
 
     markerLine = new MarkerLine(chart);
     Q_CHECK_PTR(markerLine);
+    markerLine->hide();
+    markerLine->setZValue(11);
 
     setChart(chart);
-    createLines("line");
+    QVector<QString> name = {"line0"};
+    createLines(name);
 
     timeAxis.setFormat("dd h:mm:ss");
     timeAxis.setTickCount(10);
@@ -60,20 +64,19 @@ void LineChartView::getAxisRect(void)
 }
 void LineChartView::resizeEvent(QResizeEvent *event)
 {
-//    QGraphicsView::resizeEvent(event);
     markerLine->changeGeo(getAxisBound());
 
     QChartView::resizeEvent(event);
 }
-void LineChartView::setNumOfLine(quint8 num, const QString &baseName)
+void LineChartView::setNumOfLine(quint8 num, const QVector<QString> &name, lineType type)
 {
-    if(num)
+    linesType = type;
+    if(num != lineNum)
     {
         lineNum = num;
 
-        createLines(baseName);
+        createLines(name);
     }
-
 }
 void LineChartView::setChartType(chartType type)
 {
@@ -106,7 +109,7 @@ void LineChartView::resetAxis(void)
 
     if(series.size())
     {
-        for(auto serie : series)
+        for(auto serie : chart->series())
         {
             serie->attachAxis(axis);
             serie->attachAxis(&yAxis);
@@ -124,7 +127,7 @@ void LineChartView::clearLinesData(void)
     //reset date start time
     strMSecs = QDateTime::currentDateTime().toMSecsSinceEpoch();
 }
-void LineChartView::createLines(const QString &baseName)
+void LineChartView::createLines(const QVector<QString> &name)
 {
     //remove all data of old series
     clearLinesData();
@@ -135,12 +138,31 @@ void LineChartView::createLines(const QString &baseName)
     for(int i = 0; i < lineNum; ++i)
     {
         QLineSeries *line = new QLineSeries();
-        line->setName(baseName + QString("%1").arg(i));
+        line->setName(name[i]);
 
         series.push_back(line);
 
-        chart->addSeries(line);
+        if(linesType == AREA)
+        {
+            QAreaSeries *area = nullptr;
+            if(i >= 1)
+            {
+                area = new QAreaSeries(line, series[i - 1]);
+            }
+            else
+            {
+                area = new QAreaSeries(line);
+            }
+            area->setName(name[i]);
+            chart->addSeries(area);
+            line->setColor(area->color());
+        }
+        else
+        {
+            chart->addSeries(line);
+        }
     }
+//     markerLine->setParentItem(series[0]);
 
     resetAxis();
 }
@@ -152,7 +174,8 @@ void LineChartView::saveLinesData(QVector<QVector<QPointF>> &data)
     }
     for(int i = 0; i < data.size(); ++i)
     {
-        linesVal[i].append(data[i]);
+        for(int j = 0; j < data[i].size(); ++j)
+            linesVal[i].push_back(data[i].at(j));
     }
     refreshLines();
 }
@@ -197,29 +220,45 @@ void LineChartView::refreshLines(void)
 
     if(disType == DATE)
     {
-        series[0]->attachedAxes()[0]->setMax(QDateTime::fromMSecsSinceEpoch(series[0]->at(lineLen - 1).x()));
-        series[0]->attachedAxes()[0]->setMin(QDateTime::fromMSecsSinceEpoch(series[0]->at(0).x()));
+        timeAxis.setMax(QDateTime::fromMSecsSinceEpoch(series[0]->at(lineLen - 1).x()));
+        timeAxis.setMin(QDateTime::fromMSecsSinceEpoch(series[0]->at(0).x()));
     }
     else
     {
-        series[0]->attachedAxes()[0]->setMax(series[0]->at(lineLen - 1).x());
-        series[0]->attachedAxes()[0]->setMin(series[0]->at(0).x());
+        xValueAxis.setMax(series[0]->at(lineLen - 1).x());
+        xValueAxis.setMin(series[0]->at(0).x());
     }
+
+    refreshMarkerLabel();
 }
 void LineChartView::setDisCount(quint16 count)
 {
     disCount = count;
 }
+bool LineChartView::seriesHasContents(void)
+{
+    bool ret = false;
+
+    if((series.size()) && (series[0]->pointsVector().size()))
+    {
+        ret = true;
+    }
+
+    return ret;
+}
 void LineChartView::getXOfPos(void)
 {
-    selectX = chart->mapToPosition(series[0]->pointsVector()[selectIndex]).rx();
+    if(seriesHasContents())
+    {
+        selectX = chart->mapToPosition(series[0]->pointsVector()[selectIndex]).rx();
+    }
 }
 void LineChartView::getIndexOfPos(const QPoint &pos)
 {
     QLineSeries *line = series[0];
 
     QVector<QPointF> points = line->pointsVector();
-    QPointF chartVal = chart->mapToValue(pos, series[0]);
+    QPointF chartVal = chart->mapToValue(pos, chart->series()[0]);
 
     quint16 index = 0;
     for(;index < points.size() - 1; ++index)
@@ -258,15 +297,14 @@ QString LineChartView::getXLabelAtPoint(void)
 
     return brief;
 }
-void LineChartView::mouseMoveEvent(QMouseEvent *event)
+void LineChartView::refreshMarkerLabel(void)
 {
-    qDebug() << "mouse pos:" << event->pos();
     getAxisRect();
-    if(axisRect.contains(event->pos()))
+    if((axisRect.contains(mousePoint)) && (seriesHasContents()))
     {
-        getIndexOfPos(event->pos());
+        getIndexOfPos(mousePoint);
         bool labelSide = true;
-        if(selectIndex == series[0]->count() - 1)
+        if((mousePoint.rx() - axisRect.x()) > (axisRect.width() / 2))
         {
             labelSide = false;
         }
@@ -275,14 +313,18 @@ void LineChartView::mouseMoveEvent(QMouseEvent *event)
         markerLine->setBrief(getXLabelAtPoint());
 
         QVector<std::tuple<QColor, QString, qreal>> contents;
-        for(auto line : series)
+
+        for(int i = 0; i < series.size(); ++i)
         {
-            QColor color = line->color();
-            QString name = line->name();
+            QColor color = series[i]->color();
+            QString name = series[i]->name();
 
-            QVector<QPointF> points = line->pointsVector();
+            QVector<QPointF> points = series[i]->pointsVector();
             qreal   val = points[selectIndex].ry();
-
+            if((i >= 1) && (linesType == AREA))
+            {
+                val -= series[i - 1]->pointsVector()[selectIndex].ry();
+            }
 
             contents.push_back(std::tuple<QColor, QString, qreal>(color, name, val));
         }
@@ -294,4 +336,10 @@ void LineChartView::mouseMoveEvent(QMouseEvent *event)
     {
         markerLine->hide();
     }
+}
+void LineChartView::mouseMoveEvent(QMouseEvent *event)
+{
+    mousePoint = event->pos();
+    markerLine->changeGeo(getAxisBound());
+    refreshMarkerLabel();
 }

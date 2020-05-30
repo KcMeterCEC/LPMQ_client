@@ -24,7 +24,7 @@ QRectF MarkerLine::boundingRect() const
 }
 void MarkerLine::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-//    painter->setBrush(QColor(100, 100, 100, 100));
+//    painter->setBrush(QColor(100, 100, 100, 255));
 //    painter->drawRect(geo);
 
     //draw center line
@@ -56,23 +56,28 @@ void MarkerLine::drawContents(bool isRight, QPainter *painter, const QPoint &str
 
     QRect rect(x, y, w, h);
 
-    painter->setBrush(QColor(255, 200, 200, 100));
+    painter->setPen(QColor(134, 134, 134, 250));
+    painter->setBrush(QColor(134, 134, 134, 250));
     painter->drawRect(rect);
 
-    painter->drawText(rect, Qt::AlignHCenter, brief);
+    painter->setPen(QColor(255, 255, 255, 250));
+    painter->drawText(rect, Qt::AlignCenter, brief);
     //draw contents
     quint8 contentsCnt = pointContents.size();
-    painter->setPen(QColor(64, 78, 140, 255));
+
+    painter->setBrush(QColor(255, 255, 255, 255));
     for(int i = 0; i < contentsCnt; ++i)
     {
-        QRect labelRect1(x, y + (i + 1) * h, w * 3 / 4, h);
-        QRect labelRect2(x + labelRect1.width(), y + (i + 1) * h, w * 1 / 4, h);
+        QRect labelRect1(x, y + (i + 1) * h, w * 2 / 4, h);
+        QRect labelRect2(x + labelRect1.width(), y + (i + 1) * h, w * 2 / 4, h);
+
+        painter->setPen(std::get<0>(pointContents[i]));
 
         painter->drawRect(labelRect1);
-        painter->drawText(labelRect1, Qt::AlignHCenter, std::get<1>(pointContents[i]));
+        painter->drawText(labelRect1, Qt::AlignCenter, std::get<1>(pointContents[i]));
 
         painter->drawRect(labelRect2);
-        painter->drawText(labelRect2, Qt::AlignHCenter,
+        painter->drawText(labelRect2, Qt::AlignCenter,
                           QString("%1").arg(std::get<2>(pointContents[i])));
     }
 

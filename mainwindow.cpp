@@ -17,7 +17,6 @@
 
 #include "commander.h"
 #include "display/donutbreakdown/dispiechart.h"
-#include "display/multiline/dislinechart.h"
 #include "display/tasklist/tasklist.h"
 #include "display/linechart/linechartview.h"
 
@@ -80,15 +79,17 @@ MainWindow::MainWindow(QWidget *parent)
     ui->gridLayout->addWidget(psChart, 0, 0, 1, 5);
     ui->gridLayout->addWidget(memChart, 1, 0, 1, 5);
 
-    overviewLine = new DisLineChart(this);
-    Q_CHECK_PTR(overviewLine);
-
-    psLineChart = new LineChartView(this, "cpus' usage");
+    psLineChart = new LineChartView(this, "history usage of cpu");
+    psLineChart->setDisCount(100);
     ui->gridLayout->addWidget(psLineChart, 0, 5, 1, 10);
 
-    memLine = overviewLine->createMemChart();
-    Q_CHECK_PTR(memLine);
-    ui->gridLayout->addWidget(memLine, 1, 5, 1, 10);
+    memLineChart = new LineChartView(this, "history usage of memory(MB)");
+    memLineChart->setDisCount(100);
+
+    QVector<QString> name = {"used", "buffers", "cached", "free"};
+
+    memLineChart->setNumOfLine(name.size(), name, LineChartView::AREA);
+    ui->gridLayout->addWidget(memLineChart, 1, 5, 1, 10);
 
     taskOverview = new TaskList(nullptr, cmd);
     Q_CHECK_PTR(taskOverview);
@@ -224,6 +225,8 @@ void  MainWindow::showSysInfo(const QMap<QString, QString> &info)
 }
 void MainWindow::execOverview()
 {
+    currentSec += timeAdj->value();
+
     cmd->requestCpuUsage();
     cmd->requestMemUsage();
     taskOverview->execTaskList();
@@ -236,23 +239,57 @@ void MainWindow::triggerValueChanged(int value)
 {
     refreshTriggerTime(value);
 }
+void  MainWindow::refreshCpuUsage(const QMap<QString, double> &info)
+{
+    QVector<QVector<QPointF>> usage;
+
+    usage.resize(info.value("cpu count"));
+    for(int i = 0; i < usage.size(); ++i)
+    {
+        usage[i].push_back(QPointF(currentSec, info.value(QString("cpu%1.usage").arg(i))));
+    }
+    psLineChart->saveLinesData(usage);
+}
+void  MainWindow::refreshMemUsage(const QMap<QString, qulonglong> &info)
+{
+    QVector<QVector<QPointF>> usage;
+    usage.resize(4);
+
+    usage[0].push_back(QPointF(currentSec, info.value("mem.used")));
+    usage[1].push_back(QPointF(currentSec,
+    info.value("mem.used") + info.value("mem.buffers")));
+    usage[2].push_back(QPointF(currentSec,
+    info.value("mem.used") + info.value("mem.buffers") + info.value("mem.cache")));
+    usage[3].push_back(QPointF(currentSec,
+    info.value("mem.total")));
+
+    memLineChart->saveLinesData(usage);
+}
 void  MainWindow::showCpuUsage(const QMap<QString, double> &info)
 {
-    psLineChart->setNumOfLine(info.value("cpu count"), "cpu");
+    QVector<QString> name;
 
-//    overviewLine->refreshPsChart(info);
+    name.resize(info.value("cpu count"));
+    for(int i = 0; i < name.size(); ++i)
+    {
+        name[i] = QString("cpu%1").arg(i);
+    }
+    psLineChart->setNumOfLine(name.size(), name);
+
+    refreshCpuUsage(info);
     overviewPie->refreshPsChart(info);
+
 }
 void MainWindow::showMemUsage(const QMap<QString, qulonglong> &info)
 {
     overviewPie->refreshMemChart(info);
-    overviewLine->refreshMemChart(info);
+    refreshMemUsage(info);
 }
 
 void MainWindow::on_actionclear_triggered()
 {
     psLineChart->clearLinesData();
-    overviewLine->memChartClear();
+    memLineChart->clearLinesData();
 }
 void MainWindow::mouseDoubleClickEvent(QMouseEvent *event)
 {

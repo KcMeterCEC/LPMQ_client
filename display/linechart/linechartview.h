@@ -20,8 +20,14 @@ public:
         VALUE,
     }chartType;
 
+    typedef enum
+    {
+        NORMAL,
+        AREA,
+    }lineType;
+
     explicit LineChartView(QWidget *parent = nullptr, const QString &title = "chart");
-    void setNumOfLine(quint8 num, const QString &baseName);
+    void setNumOfLine(quint8 num, const QVector<QString> &name, lineType type = NORMAL);
     void setDisCount(quint16 count);
     void clearLinesData(void);
     void setChartType(chartType type);
@@ -36,6 +42,7 @@ private:
     QVector<QLineSeries *> series;
     LineChart   *chart = nullptr;
     chartType   disType = DATE;
+    lineType    linesType = NORMAL;
     qint64      strMSecs = 0;
     QDateTimeAxis timeAxis;
     QValueAxis      yAxis;
@@ -44,9 +51,10 @@ private:
     qreal           selectIndex = 0;
     qreal           selectX = 0;
     QRectF          axisRect;
+    QPoint          mousePoint;
 
     void clearLines(void);
-    void createLines(const QString &baseName);
+    void createLines(const QVector<QString> &name);
     void refreshLines(void);
     void resetAxis(void);
     void getIndexOfPos(const QPoint &pos);
@@ -54,6 +62,8 @@ private:
     void getAxisRect(void);
     QRectF getAxisBound(void);
     QString getXLabelAtPoint(void);
+    bool seriesHasContents(void);
+    void refreshMarkerLabel(void);
 };
 
 #endif // LINECHARTVIEW_H

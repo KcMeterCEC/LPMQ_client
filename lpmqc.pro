@@ -25,7 +25,6 @@ SOURCES += \
     display/linechart/linechart.cpp \
     display/linechart/linechartview.cpp \
     display/linechart/markerline.cpp \
-    display/multiline/dislinechart.cpp \
     display/tasklist/filterwidget.cpp \
     display/tasklist/tasklist.cpp \
     main.cpp \
@@ -42,7 +41,6 @@ HEADERS += \
     display/linechart/linechart.h \
     display/linechart/linechartview.h \
     display/linechart/markerline.h \
-    display/multiline/dislinechart.h \
     display/tasklist/filterwidget.h \
     display/tasklist/tasklist.h \
     mainwindow.h \

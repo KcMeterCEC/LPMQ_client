@@ -14,7 +14,6 @@ class QSettings;
 class QTimer;
 class QSpinBox;
 class DisPieChart;
-class DisLineChart;
 class TaskList;
 class LineChartView;
 
@@ -52,8 +51,9 @@ private:
     QTimer          *overviewTimer = nullptr;
     QSpinBox        *timeAdj = nullptr;
     DisPieChart     *overviewPie = nullptr;
-    DisLineChart    *overviewLine = nullptr;
-    LineChartView   *psLineChart;
+    LineChartView   *psLineChart = nullptr;
+    LineChartView   *memLineChart = nullptr;
+    quint64         currentSec = 0;
 
     QChartView      *psChart = nullptr;
     QChartView      *memChart = nullptr;
@@ -63,7 +63,8 @@ private:
 
     void    disConnectStatus(void);
     void    refreshTriggerTime(int value);
-
+    void    refreshCpuUsage(const QMap<QString, double> &info);
+    void    refreshMemUsage(const QMap<QString, qulonglong> &info);
     void    closeEvent(QCloseEvent *event);
 };
 #endif // MAINWINDOW_H
