@@ -23,7 +23,7 @@ private:
 
     QMap<QString, double> statBk;
 signals:
-    void  resultMemUsage(const QMap<QString, qulonglong> &info);
+    void  resultMemUsage(const QMap<QString, double> &info);
 };
 
 #endif // MEM_H

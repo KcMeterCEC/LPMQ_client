@@ -9,7 +9,7 @@
 #include "markerline.h"
 
 LineChartView::LineChartView(QWidget *parent, const QString &title):
-    QChartView(parent)
+    QChartView(parent), disCount(dispMin)
 {
     chart = new LineChart();
     Q_CHECK_PTR(chart);
@@ -126,6 +126,8 @@ void LineChartView::clearLinesData(void)
     }
     //reset date start time
     strMSecs = QDateTime::currentDateTime().toMSecsSinceEpoch();
+
+    disOffset = 0;
 }
 void LineChartView::createLines(const QVector<QString> &name)
 {
@@ -162,7 +164,6 @@ void LineChartView::createLines(const QVector<QString> &name)
             chart->addSeries(line);
         }
     }
-//     markerLine->setParentItem(series[0]);
 
     resetAxis();
 }
@@ -179,35 +180,45 @@ void LineChartView::saveLinesData(QVector<QVector<QPointF>> &data)
     }
     refreshLines();
 }
-void LineChartView::clearLines(void)
+bool LineChartView::clearLines(void)
 {
-    if(!series.size()) return;
+    if(!series.size()) return false;
 
     for(auto line : series)
     {
         line->clear();
     }
+
+    return true;
 }
 void LineChartView::refreshLines(void)
 {
-    clearLines();
+    if(!clearLines()) return;
 
     quint16 lineLen = disCount < linesVal[0].size() ? disCount : linesVal[0].size();
-
+    quint16 strIndex = linesVal[0].size() - lineLen + disOffset;
     qreal yMax = 0;
+
+    if(strIndex > (linesVal[0].size() - 1))
+    {
+        strIndex = (linesVal[0].size() - 1);
+    }
 
     for(int j = 0; j < linesVal.size(); ++j)
     {
-        for(int i = linesVal[0].size() - lineLen; i < linesVal[0].size(); ++i)
+        QList<QPointF> seriesPoint;
+        for(int i = strIndex; i < linesVal[0].size(); ++i)
         {
             if(disType == DATE)
             {
-                series[j]->append(strMSecs + linesVal[j].at(i).x() * 1000,
-                                  linesVal[j].at(i).y());
+                seriesPoint.push_back(QPointF(
+                                          strMSecs + linesVal[j].at(i).x() * 1000,
+                                          linesVal[j].at(i).y()
+                                          ));
             }
             else
             {
-                series[j]->append(linesVal[j].at(i));
+                seriesPoint.push_back(linesVal[j].at(i));
             }
 
             if(yMax < linesVal[j].at(i).y())
@@ -215,6 +226,7 @@ void LineChartView::refreshLines(void)
                 yMax = linesVal[j].at(i).y();
             }
         }
+        series[j]->append(seriesPoint);
     }
     yAxis.setMax(yMax);
 
@@ -248,7 +260,7 @@ bool LineChartView::seriesHasContents(void)
 }
 void LineChartView::getXOfPos(void)
 {
-    if(seriesHasContents())
+    if(seriesHasContents() && (selectIndex < series[0]->pointsVector().size()))
     {
         selectX = chart->mapToPosition(series[0]->pointsVector()[selectIndex]).rx();
     }
@@ -342,4 +354,139 @@ void LineChartView::mouseMoveEvent(QMouseEvent *event)
     mousePoint = event->pos();
     markerLine->changeGeo(getAxisBound());
     refreshMarkerLabel();
+
+    if(setOffset)
+    {
+        bool refresh = false;
+
+        int moveDistance = disCount / 10;
+        if(moveDistance == 0)
+        {
+            moveDistance = 1;
+        }
+        if((mousePoint.rx() - mouseLastPoint.rx()) > 0)
+        {
+            int curveDistance = linesVal[0].size() - disCount + disOffset;
+            if(curveDistance > 0)
+            {
+                int move = moveDistance < curveDistance ? moveDistance : curveDistance;
+                disOffset -= move;
+
+                refresh = true;
+            }
+        }
+        else
+        {
+            int curveDistance = -disOffset;
+
+            if(curveDistance > 0)
+            {
+                int move = moveDistance < curveDistance ? moveDistance : curveDistance;
+
+                disOffset += move;
+
+                refresh = true;
+            }
+            else
+            {
+                disOffset = 0;
+            }
+        }
+
+        if(refresh)
+        {
+            refreshLines();
+        }
+
+        mouseLastPoint = mousePoint;
+    }
+}
+void LineChartView::mousePressEvent(QMouseEvent *event)
+{
+    if(event->button() == Qt::LeftButton)
+    {
+        setCursor(Qt::ClosedHandCursor);
+
+        if(linesVal.size())
+        {
+            setOffset = true;
+            mouseLastPoint = event->pos();
+        }
+    }
+}
+void LineChartView::mouseReleaseEvent(QMouseEvent *event)
+{
+    setCursor(Qt::ArrowCursor);
+    setOffset = false;
+}
+void LineChartView::wheelEvent(QWheelEvent *event)
+{
+    if(!seriesHasContents()) return;
+
+    QPoint degress = event->angleDelta() / 8;
+    bool isForward = degress.ry() > 0 ? true : false;
+
+    bool refresh = false;
+
+    int countAdj = disCount / 10;
+    if(countAdj == 0)
+    {
+        countAdj = 1;
+    }
+
+    if(isForward)
+    {
+        int countDistance = disCount - dispMin;
+        if(countDistance > 0)
+        {
+            disCount -= (countAdj < countDistance ? countAdj : countDistance);
+
+            refresh = true;
+        }
+        else
+        {
+            disCount = dispMin;
+        }
+    }
+    else
+    {
+        bool recal = true;
+        while((linesVal[0].size() - disCount + disOffset) <= 0)
+        {
+            int offset = -disOffset;
+
+            if(offset > 0)
+            {
+                disOffset += (countAdj < offset ? countAdj : offset);
+            }
+            else
+            {
+                recal = false;
+                break;
+            }
+        }
+
+        if(recal)
+        {
+            int maxCount = linesVal[0].size() + disOffset - disCount;
+            int adjCount = countAdj < maxCount ? countAdj : maxCount;
+
+            if((adjCount + disCount) <= dispMax)
+            {
+                disCount += adjCount;
+                refresh = true;
+            }
+            else
+            {
+                disCount = dispMax;
+            }
+        }
+    }
+
+    if(refresh)
+    {
+        refreshLines();
+    }
+
+    event->accept();
 }
