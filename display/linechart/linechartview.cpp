@@ -255,7 +255,7 @@ bool LineChartView::seriesHasContents(void)
 }
 void LineChartView::getXOfPos(void)
 {
-    if(seriesHasContents())
+    if(seriesHasContents() && (selectIndex < series[0]->pointsVector().size()))
     {
         selectX = chart->mapToPosition(series[0]->pointsVector()[selectIndex]).rx();
     }
