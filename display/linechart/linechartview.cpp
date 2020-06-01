@@ -9,7 +9,7 @@
 #include "markerline.h"
 
 LineChartView::LineChartView(QWidget *parent, const QString &title):
-    QChartView(parent)
+    QChartView(parent), disCount(dispMin)
 {
     chart = new LineChart();
     Q_CHECK_PTR(chart);
@@ -354,29 +354,25 @@ void LineChartView::mouseMoveEvent(QMouseEvent *event)
     {
         bool refresh = false;
 
-        if((disCount + disOffset) < linesVal[0].size())
+        if((mousePoint.rx() - mouseLastPoint.rx()) > 0)
         {
-            if((mousePoint.rx() - mouseLastPoint.rx()) > 0)
+            if((linesVal[0].size() - disCount + disOffset) > 0)
             {
-                if((linesVal[0].size() - disCount + disOffset) > 0)
-                {
-                    --disOffset;
-                    refresh = true;
-                }
+                --disOffset;
+                refresh = true;
+            }
+        }
+        else
+        {
+            if(++disOffset <= 0)
+            {
+                refresh = true;
             }
             else
             {
-                if(++disOffset <= 0)
-                {
-                    refresh = true;
-                }
-                else
-                {
-                    disOffset = 0;
-                }
+                disOffset = 0;
             }
         }
-
 
         if(refresh)
         {
@@ -403,4 +399,59 @@ void LineChartView::mouseReleaseEvent(QMouseEvent *event)
 {
     setCursor(Qt::ArrowCursor);
     setOffset = false;
+}
+void LineChartView::wheelEvent(QWheelEvent *event)
+{
+    if(!seriesHasContents()) return;
+
+    QPoint degress = event->angleDelta() / 8;
+    bool isForward = degress.ry() > 0 ? true : false;
+
+    bool refresh = false;
+    if(isForward)
+    {
+        if(--disCount >= dispMin)
+        {
+            refresh = true;
+        }
+        else
+        {
+            disCount = dispMin;
+        }
+    }
+    else
+    {
+        bool recal = true;
+        while((linesVal[0].size() - disCount + disOffset) <= 0)
+        {
+            if(disOffset < 0)
+            {
+                disOffset += 1;
+            }
+            else
+            {
+                recal = false;
+                break;
+            }
+        }
+
+        if(recal)
+        {
+            if(++disCount <= dispMax)
+            {
+                refresh = true;
+            }
+            else
+            {
+                disCount = dispMax;
+            }
+        }
+    }
+
+    if(refresh)
+    {
+        refreshLines();
+    }
+
+    event->accept();
 }

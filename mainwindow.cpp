@@ -80,11 +80,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->gridLayout->addWidget(memChart, 1, 0, 1, 5);
 
     psLineChart = new LineChartView(this, "history usage of cpu");
-    psLineChart->setDisCount(100);
     ui->gridLayout->addWidget(psLineChart, 0, 5, 1, 10);
 
     memLineChart = new LineChartView(this, "history usage of memory(MB)");
-    memLineChart->setDisCount(100);
 
     QVector<QString> name = {"used", "buffers", "cached", "free"};
 

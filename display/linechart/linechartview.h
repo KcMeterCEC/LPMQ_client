@@ -37,9 +37,12 @@ protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 private:
+    const   quint16 dispMin = 20;
+    const   quint16 dispMax = 200;
     quint8  lineNum = 1;
-    quint16 disCount = 10;
+    quint16 disCount;
     QVector<QVector<QPointF>> linesVal;
     QVector<QLineSeries *> series;
     LineChart   *chart = nullptr;
