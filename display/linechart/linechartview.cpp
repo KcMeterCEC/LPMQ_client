@@ -199,6 +199,11 @@ void LineChartView::refreshLines(void)
     quint16 strIndex = linesVal[0].size() - lineLen + disOffset;
     qreal yMax = 0;
 
+    if(strIndex > (linesVal[0].size() - 1))
+    {
+        strIndex = (linesVal[0].size() - 1);
+    }
+
     for(int j = 0; j < linesVal.size(); ++j)
     {
         QList<QPointF> seriesPoint;
@@ -354,18 +359,32 @@ void LineChartView::mouseMoveEvent(QMouseEvent *event)
     {
         bool refresh = false;
 
+        int moveDistance = disCount / 10;
+        if(moveDistance == 0)
+        {
+            moveDistance = 1;
+        }
         if((mousePoint.rx() - mouseLastPoint.rx()) > 0)
         {
-            if((linesVal[0].size() - disCount + disOffset) > 0)
+            int curveDistance = linesVal[0].size() - disCount + disOffset;
+            if(curveDistance > 0)
             {
-                --disOffset;
+                int move = moveDistance < curveDistance ? moveDistance : curveDistance;
+                disOffset -= move;
+
                 refresh = true;
             }
         }
         else
         {
-            if(++disOffset <= 0)
+            int curveDistance = -disOffset;
+
+            if(curveDistance > 0)
             {
+                int move = moveDistance < curveDistance ? moveDistance : curveDistance;
+
+                disOffset += move;
+
                 refresh = true;
             }
             else
@@ -408,10 +427,20 @@ void LineChartView::wheelEvent(QWheelEvent *event)
     bool isForward = degress.ry() > 0 ? true : false;
 
     bool refresh = false;
+
+    int countAdj = disCount / 10;
+    if(countAdj == 0)
+    {
+        countAdj = 1;
+    }
+
     if(isForward)
     {
-        if(--disCount >= dispMin)
+        int countDistance = disCount - dispMin;
+        if(countDistance > 0)
         {
+            disCount -= (countAdj < countDistance ? countAdj : countDistance);
+
             refresh = true;
         }
         else
@@ -424,9 +453,11 @@ void LineChartView::wheelEvent(QWheelEvent *event)
         bool recal = true;
         while((linesVal[0].size() - disCount + disOffset) <= 0)
         {
-            if(disOffset < 0)
+            int offset = -disOffset;
+
+            if(offset > 0)
             {
-                disOffset += 1;
+                disOffset += (countAdj < offset ? countAdj : offset);
             }
             else
             {
@@ -437,8 +468,12 @@ void LineChartView::wheelEvent(QWheelEvent *event)
 
         if(recal)
         {
-            if(++disCount <= dispMax)
+            int maxCount = linesVal[0].size() + disOffset - disCount;
+            int adjCount = countAdj < maxCount ? countAdj : maxCount;
+
+            if((adjCount + disCount) <= dispMax)
             {
+                disCount += adjCount;
                 refresh = true;
             }
             else
