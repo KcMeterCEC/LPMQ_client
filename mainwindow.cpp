@@ -80,11 +80,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->gridLayout->addWidget(memChart, 1, 0, 1, 5);
 
     psLineChart = new LineChartView(this, "history usage of cpu");
-    psLineChart->setDisCount(100);
     ui->gridLayout->addWidget(psLineChart, 0, 5, 1, 10);
 
     memLineChart = new LineChartView(this, "history usage of memory(MB)");
-    memLineChart->setDisCount(100);
 
     QVector<QString> name = {"used", "buffers", "cached", "free"};
 
@@ -250,7 +248,7 @@ void  MainWindow::refreshCpuUsage(const QMap<QString, double> &info)
     }
     psLineChart->saveLinesData(usage);
 }
-void  MainWindow::refreshMemUsage(const QMap<QString, qulonglong> &info)
+void  MainWindow::refreshMemUsage(const QMap<QString, double> &info)
 {
     QVector<QVector<QPointF>> usage;
     usage.resize(4);
@@ -280,7 +278,7 @@ void  MainWindow::showCpuUsage(const QMap<QString, double> &info)
     overviewPie->refreshPsChart(info);
 
 }
-void MainWindow::showMemUsage(const QMap<QString, qulonglong> &info)
+void MainWindow::showMemUsage(const QMap<QString, double> &info)
 {
     overviewPie->refreshMemChart(info);
     refreshMemUsage(info);
