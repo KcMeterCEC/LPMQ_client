@@ -119,7 +119,7 @@ void  DisPieChart::refreshPsChart(const QMap<QString, double> &info)
 
     psChart->refresh();
 }
-void  DisPieChart::refreshMemChart(const QMap<QString, qulonglong> &info)
+void  DisPieChart::refreshMemChart(const QMap<QString, double> &info)
 {
     auto slices = memUsed->slices();
     for (QPieSlice *slice : slices)

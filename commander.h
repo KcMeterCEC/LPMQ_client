@@ -97,7 +97,7 @@ signals:
     void    psResultCpuUsage(const QMap<QString, double> &info);
     void    psResultTaskList(const QVector<QMap<QString, QString>> &info);
 
-    void    memResultMemUsage(const QMap<QString, qulonglong> &info);
+    void    memResultMemUsage(const QMap<QString, double> &info);
 };
 
 #endif // COMMANDER_H

@@ -250,7 +250,7 @@ void  MainWindow::refreshCpuUsage(const QMap<QString, double> &info)
     }
     psLineChart->saveLinesData(usage);
 }
-void  MainWindow::refreshMemUsage(const QMap<QString, qulonglong> &info)
+void  MainWindow::refreshMemUsage(const QMap<QString, double> &info)
 {
     QVector<QVector<QPointF>> usage;
     usage.resize(4);
@@ -280,7 +280,7 @@ void  MainWindow::showCpuUsage(const QMap<QString, double> &info)
     overviewPie->refreshPsChart(info);
 
 }
-void MainWindow::showMemUsage(const QMap<QString, qulonglong> &info)
+void MainWindow::showMemUsage(const QMap<QString, double> &info)
 {
     overviewPie->refreshMemChart(info);
     refreshMemUsage(info);

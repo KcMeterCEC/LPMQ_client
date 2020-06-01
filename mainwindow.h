@@ -36,7 +36,7 @@ private slots:
     void showSysInfo(const QMap<QString, QString> &info);
     void showCpuUsage(const QMap<QString, double> &info);
 
-    void showMemUsage(const QMap<QString, qulonglong> &info);
+    void showMemUsage(const QMap<QString, double> &info);
 
     void triggerValueChanged(int value);
 
@@ -64,7 +64,7 @@ private:
     void    disConnectStatus(void);
     void    refreshTriggerTime(int value);
     void    refreshCpuUsage(const QMap<QString, double> &info);
-    void    refreshMemUsage(const QMap<QString, qulonglong> &info);
+    void    refreshMemUsage(const QMap<QString, double> &info);
     void    closeEvent(QCloseEvent *event);
 };
 #endif // MAINWINDOW_H
