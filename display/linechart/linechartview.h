@@ -33,6 +33,8 @@ public:
     void setChartType(chartType type);
     void saveLinesData(QVector<QVector<QPointF>> &data);
 protected:
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 private:
@@ -52,6 +54,9 @@ private:
     qreal           selectX = 0;
     QRectF          axisRect;
     QPoint          mousePoint;
+    QPoint          mouseLastPoint;
+    bool            setOffset = false;
+    int             disOffset = 0;
 
     void clearLines(void);
     void createLines(const QVector<QString> &name);

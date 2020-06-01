@@ -126,6 +126,8 @@ void LineChartView::clearLinesData(void)
     }
     //reset date start time
     strMSecs = QDateTime::currentDateTime().toMSecsSinceEpoch();
+
+    disOffset = 0;
 }
 void LineChartView::createLines(const QVector<QString> &name)
 {
@@ -162,7 +164,6 @@ void LineChartView::createLines(const QVector<QString> &name)
             chart->addSeries(line);
         }
     }
-//     markerLine->setParentItem(series[0]);
 
     resetAxis();
 }
@@ -193,12 +194,12 @@ void LineChartView::refreshLines(void)
     clearLines();
 
     quint16 lineLen = disCount < linesVal[0].size() ? disCount : linesVal[0].size();
-
+    quint16 strIndex = linesVal[0].size() - lineLen + disOffset;
     qreal yMax = 0;
 
     for(int j = 0; j < linesVal.size(); ++j)
     {
-        for(int i = linesVal[0].size() - lineLen; i < linesVal[0].size(); ++i)
+        for(int i = strIndex; i < linesVal[0].size(); ++i)
         {
             if(disType == DATE)
             {
@@ -342,4 +343,58 @@ void LineChartView::mouseMoveEvent(QMouseEvent *event)
     mousePoint = event->pos();
     markerLine->changeGeo(getAxisBound());
     refreshMarkerLabel();
+
+    if(setOffset)
+    {
+        bool refresh = false;
+
+        if((disCount + disOffset) < linesVal[0].size())
+        {
+            if((mousePoint.rx() - mouseLastPoint.rx()) > 0)
+            {
+                if((linesVal[0].size() - disCount + disOffset) > 0)
+                {
+                    --disOffset;
+                    refresh = true;
+                }
+            }
+            else
+            {
+                if(++disOffset <= 0)
+                {
+                    refresh = true;
+                }
+                else
+                {
+                    disOffset = 0;
+                }
+            }
+        }
+
+
+        if(refresh)
+        {
+            refreshLines();
+        }
+
+        mouseLastPoint = mousePoint;
+    }
+}
+void LineChartView::mousePressEvent(QMouseEvent *event)
+{
+    if(event->button() == Qt::LeftButton)
+    {
+        setCursor(Qt::ClosedHandCursor);
+
+        if(linesVal.size())
+        {
+            setOffset = true;
+            mouseLastPoint = event->pos();
+        }
+    }
+}
+void LineChartView::mouseReleaseEvent(QMouseEvent *event)
+{
+    setCursor(Qt::ArrowCursor);
+    setOffset = false;
 }
