@@ -58,7 +58,7 @@ private:
     bool            setOffset = false;
     int             disOffset = 0;
 
-    void clearLines(void);
+    bool clearLines(void);
     void createLines(const QVector<QString> &name);
     void refreshLines(void);
     void resetAxis(void);

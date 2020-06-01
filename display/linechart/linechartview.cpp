@@ -180,18 +180,20 @@ void LineChartView::saveLinesData(QVector<QVector<QPointF>> &data)
     }
     refreshLines();
 }
-void LineChartView::clearLines(void)
+bool LineChartView::clearLines(void)
 {
-    if(!series.size()) return;
+    if(!series.size()) return false;
 
     for(auto line : series)
     {
         line->clear();
     }
+
+    return true;
 }
 void LineChartView::refreshLines(void)
 {
-    clearLines();
+    if(!clearLines()) return;
 
     quint16 lineLen = disCount < linesVal[0].size() ? disCount : linesVal[0].size();
     quint16 strIndex = linesVal[0].size() - lineLen + disOffset;
@@ -199,16 +201,19 @@ void LineChartView::refreshLines(void)
 
     for(int j = 0; j < linesVal.size(); ++j)
     {
+        QList<QPointF> seriesPoint;
         for(int i = strIndex; i < linesVal[0].size(); ++i)
         {
             if(disType == DATE)
             {
-                series[j]->append(strMSecs + linesVal[j].at(i).x() * 1000,
-                                  linesVal[j].at(i).y());
+                seriesPoint.push_back(QPointF(
+                                          strMSecs + linesVal[j].at(i).x() * 1000,
+                                          linesVal[j].at(i).y()
+                                          ));
             }
             else
             {
-                series[j]->append(linesVal[j].at(i));
+                seriesPoint.push_back(linesVal[j].at(i));
             }
 
             if(yMax < linesVal[j].at(i).y())
@@ -216,6 +221,7 @@ void LineChartView::refreshLines(void)
                 yMax = linesVal[j].at(i).y();
             }
         }
+        series[j]->append(seriesPoint);
     }
     yAxis.setMax(yMax);
 
