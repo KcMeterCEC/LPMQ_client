@@ -3,7 +3,7 @@
 
 *~
 *.autosave
-*.a
+# *.a
 *.core
 *.moc
 *.o
@@ -62,14 +62,14 @@ Thumbs.db
 # MinGW generated files
 *.Debug
 *.Release
+debug
+release
 
 # Python byte code
 *.pyc
 
 # Binaries
 # --------
-*.dll
+# *.dll
 *.exe
 
-# MSVC generated files
-build*
