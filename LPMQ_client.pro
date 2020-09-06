@@ -16,11 +16,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    main.cpp \
-    widget.cpp
+    MainWindow.cpp \
+    main.cpp
 
 HEADERS += \
-    widget.h
+    MainWindow.h
 
 #
 # Third party library
@@ -29,6 +29,10 @@ HEADERS += \
 # Qt-Advanced-Docking-System
 INCLUDEPATH += 3rdlib/ads/include
 LIBS += -L"3rdlib/ads/lib" -lqtadvanceddockingd
+
+# QSS
+RESOURCES += 3rdlib/qdarkstyle/style.qrc \
+    pic/pic.qrc
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
