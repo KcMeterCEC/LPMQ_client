@@ -1,42 +1,145 @@
 #include <QLabel>
 #include <QToolBar>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QGridLayout>
+#include <QSettings>
+#include <QMessageBox>
+#include <QDebug>
 
 #include "MainWindow.h"
+#include "control/commander.h"
 
 MainWindow::MainWindow(QMainWindow *parent)
-    : QMainWindow(parent)
+    : QMainWindow(parent),
+      dockManager(new ads::CDockManager(this)),
+      userCfg(new QSettings("kcmetercec", "lpmq")),
+      msg(new QMessageBox)
 {
     setWindowIcon(QIcon(":/images/basic/monitor.png"));
+    setMinimumSize(960, 540);
+
+    cmd = Commander::getInstance();
+    connect(cmd, &Commander::connectChanged, this, &MainWindow::connectMsg);
 
     toolBarsCreate();
-
-    //Create the dock manage.Registers itself as the central widget.
-    dockManager = new ads::CDockManager(this);
-
-    // Create example content label - this can be any application specific
-    // widget
-    QLabel* l = new QLabel();
-    l->setWordWrap(true);
-    l->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    l->setText("Lorem ipsum dolor sit amet, consectetuer adipiscing elit. ");
-
-    // Create a dock widget with the title Label 1 and set the created label
-    // as the dock widget content
-    ads::CDockWidget* DockWidget = new ads::CDockWidget("Label 1");
-    DockWidget->setWidget(l);
-
-    addAction(DockWidget->toggleViewAction());
-
-    // Add the dock widget to the top dock widget area
-    dockManager->addDockWidget(ads::TopDockWidgetArea, DockWidget);
-}
-void MainWindow::toolBarsCreate(void)
-{
-    QToolBar *toolBar = addToolBar(tr("tools"));
-    QAction *connectTool = toolBar->addAction(QIcon(":/images/basic/connect.png"), tr("connect to server"));
+    msgCreate();
 }
 
 MainWindow::~MainWindow()
 {
+    delete userCfg;
 }
 
+void MainWindow::toolBarsCreate(void)
+{
+    QToolBar *toolBar = addToolBar(tr("tools"));
+    connectTool = toolBar->addAction("connect");
+    refreshConnectStatus();
+
+    connect(connectTool, &QAction::triggered, this, &MainWindow::connectSet);
+}
+void MainWindow::msgCreate(void)
+{
+    msg->setWindowIcon(QIcon(":/images/basic/monitor.png"));
+    msg->setDefaultButton(QMessageBox::Ok);
+}
+void MainWindow::msgWarning(const QString &str)
+{
+    msg->setIcon(QMessageBox::Warning);
+    msg->setText(str);
+    msg->exec();
+}
+void MainWindow::msgError(const QString &str)
+{
+    msg->setIcon(QMessageBox::Critical);
+    msg->setText(str);
+    msg->exec();
+}
+void MainWindow::msgInfo(const QString &str)
+{
+    msg->setIcon(QMessageBox::Information);
+    msg->setText(str);
+    msg->exec();
+}
+void MainWindow::requestConnect(void)
+{
+    QDialog conDialog(this);
+    conDialog.setMinimumSize(192, 108);
+
+    QLabel ipLabel(&conDialog);
+    QLineEdit ipSet(&conDialog);
+    QLabel portLabel(&conDialog);
+    QSpinBox portSet(&conDialog);
+    QDialogButtonBox button(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+                            Qt::Horizontal, &conDialog);
+    connect(&button, &QDialogButtonBox::accepted,
+            &conDialog, &QDialog::accept);
+    connect(&button, &QDialogButtonBox::rejected,
+            &conDialog, &QDialog::reject);
+    QGridLayout gridLayout(&conDialog);
+
+    gridLayout.addWidget(&ipLabel, 0, 0, 1, 1);
+    gridLayout.addWidget(&ipSet, 0, 1, 1, 4);
+    gridLayout.addWidget(&portLabel, 1, 0, 1, 1);
+    gridLayout.addWidget(&portSet, 1, 1, 1, 4);
+    gridLayout.addWidget(&button, 2, 0, 1, 5);
+
+    ipLabel.setText(tr("IP:"));
+    portLabel.setText(tr("Port:"));
+    portSet.setRange(1025, UINT16_MAX);
+    ipSet.setPlaceholderText(tr("*.local or IP address"));
+    if(userCfg->contains("serverAddr"))
+    {
+        ipSet.setText(userCfg->value("serverAddr").toString());
+    }
+    if(userCfg->contains("serverPort"))
+    {
+        portSet.setValue(userCfg->value("serverPort").toInt());
+    }
+
+    if(conDialog.exec() == QDialog::Accepted)
+    {
+        userCfg->setValue("serverAddr", ipSet.text());
+        userCfg->setValue("serverPort", portSet.value());
+        cmd->connect2Server(ipSet.text(), portSet.value());
+    }
+}
+void MainWindow::connectSet(bool checked)
+{
+    Q_UNUSED(checked);
+
+    if(cmd->connectStatus())
+    {
+        cmd->disconnectFromServer();
+        refreshConnectStatus();
+    }
+    else
+    {
+        requestConnect();
+    }
+}
+void MainWindow::refreshConnectStatus(void)
+{
+    if(cmd->connectStatus())
+    {
+        connectTool->setIcon(QIcon(":/images/basic/disconnect.png"));
+        connectTool->setToolTip(tr("disconnect from server"));
+    }
+    else
+    {
+        connectTool->setIcon(QIcon(":/images/basic/connect.png"));
+        connectTool->setToolTip(tr("connect to server"));
+    }
+}
+void MainWindow::connectMsg(bool isCon, const QString &str)
+{
+    refreshConnectStatus();
+
+    if(!isCon)
+    {
+        msgError(str);
+    }
+}
