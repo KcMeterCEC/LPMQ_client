@@ -10,11 +10,15 @@
 #include <QSpinBox>
 #include <QTimer>
 #include <QStatusBar>
+#include <QMenuBar>
 #include <QDebug>
 
 #include "MainWindow.h"
+#include "DockAreaWidget.h"
+#include "DockWidget.h"
 #include "control/commander.h"
 #include "control/targetps.h"
+#include "display/scurve/statisticcurve.h"
 
 MainWindow::MainWindow(QMainWindow *parent)
     : QMainWindow(parent),
@@ -22,7 +26,8 @@ MainWindow::MainWindow(QMainWindow *parent)
       userCfg(new QSettings("kcmetercec", "lpmq")),
       msg(new QMessageBox),
       period(new QSpinBox(this)),
-      refreshTimer(new QTimer(this))
+      refreshTimer(new QTimer(this)),
+      psCurve(new StatisticCurve(tr("history of cpu usage")))
 {
     setWindowIcon(QIcon(":/images/basic/monitor.png"));
     setMinimumSize(960, 540);
@@ -36,6 +41,7 @@ MainWindow::MainWindow(QMainWindow *parent)
 
     toolBarsCreate();
     msgCreate();
+    widgetCreate();
 }
 
 MainWindow::~MainWindow()
@@ -59,6 +65,18 @@ void MainWindow::toolBarsCreate(void)
     connect(period, SIGNAL(valueChanged(int)), this, SLOT(periodChanged(int)));
     connect(refreshTimer, &QTimer::timeout, this, &MainWindow::execRequest);
     resetTimerPeriod(period->value());
+}
+void MainWindow::widgetCreate(void)
+{
+    QMenuBar *menu = menuBar();
+
+    ads::CDockWidget *dockWidget = new ads::CDockWidget("PS overview");
+    dockWidget->setWidget(psCurve);
+    menu->addAction(dockWidget->toggleViewAction());
+    psCurve->setAxisTitle("time elaspe", "%");
+    psCurve->setAxisType(SscaleDraw::TIME);
+
+    dockManager->addDockWidget(ads::TopDockWidgetArea, dockWidget);
 }
 void MainWindow::resetTimerPeriod(int val)
 {
@@ -203,5 +221,18 @@ void MainWindow::connectMsg(bool isCon, const QString &str)
 }
 void MainWindow::showCpuUsage(const QMap<QString, double> &info)
 {
-    qDebug() << info;
+    int cpuCnt = static_cast<int>(info.value("cpu count"));
+    if(psCurveData.size() != cpuCnt)
+    {
+        qDebug() << "set curve size " << cpuCnt;
+
+        psCurveData.resize(cpuCnt);
+
+        QVector<QString> lines;
+        for(int i = 0; i < cpuCnt; ++i)
+        {
+            lines.push_back(QString("cpu%1").arg(i));
+        }
+        psCurve->setCurvesNum(lines);
+    }
 }

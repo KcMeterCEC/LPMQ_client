@@ -19,6 +19,16 @@ SOURCES += \
     MainWindow.cpp \
     control/commander.cpp \
     control/targetps.cpp \
+    display/scurve/slegend.cpp \
+    display/scurve/smarker.cpp \
+    display/scurve/splot.cpp \
+    display/scurve/splotcurve.cpp \
+    display/scurve/splotgrid.cpp \
+    display/scurve/splotmagnifier.cpp \
+    display/scurve/splotpanner.cpp \
+    display/scurve/sscaledraw.cpp \
+    display/scurve/ssymbol.cpp \
+    display/scurve/statisticcurve.cpp \
     main.cpp \
     rb.cpp
 
@@ -26,6 +36,16 @@ HEADERS += \
     MainWindow.h \
     control/commander.h \
     control/targetps.h \
+    display/scurve/slegend.h \
+    display/scurve/smarker.h \
+    display/scurve/splot.h \
+    display/scurve/splotcurve.h \
+    display/scurve/splotgrid.h \
+    display/scurve/splotmagnifier.h \
+    display/scurve/splotpanner.h \
+    display/scurve/sscaledraw.h \
+    display/scurve/ssymbol.h \
+    display/scurve/statisticcurve.h \
     rb.h
 
 QT += network
@@ -40,6 +60,19 @@ LIBS += -L"3rdlib/ads/lib" -lqtadvanceddockingd
 # QSS
 RESOURCES += 3rdlib/qdarkstyle/style.qrc \
     pic/pic.qrc
+
+# Qwt
+win32
+{
+    QWT_ROOT = C:/Qwt-6.1.4
+}
+
+unix
+{
+
+}
+
+include ($${QWT_ROOT}/features/qwt.prf)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

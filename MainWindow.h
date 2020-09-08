@@ -12,6 +12,7 @@ class QSpinBox;
 class QTimer;
 class QLabel;
 class TargetPs;
+class StatisticCurve;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -30,9 +31,12 @@ private:
     QSpinBox                *period = nullptr;
     QTimer                  *refreshTimer = nullptr;
     QLabel                  *statCpuInfo = nullptr;
+    StatisticCurve          *psCurve = nullptr;
+    QVector<QPolygonF>      psCurveData;
 
     void toolBarsCreate(void);
     void msgCreate(void);
+    void widgetCreate(void);
     void requestConnect(void);
     void refreshConnectStatus(void);
     void msgWarning(const QString &str);
