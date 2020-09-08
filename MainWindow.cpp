@@ -72,6 +72,10 @@ void MainWindow::msgCreate(void)
 {
     msg->setWindowIcon(QIcon(":/images/basic/monitor.png"));
     msg->setDefaultButton(QMessageBox::Ok);
+
+    QStatusBar *stat = statusBar();
+    statCpuInfo = new QLabel();
+    stat->addWidget(statCpuInfo);
 }
 void MainWindow::msgWarning(const QString &str)
 {
@@ -151,9 +155,8 @@ void MainWindow::connectSet(bool checked)
 void MainWindow::showSysInfo(const QMap<QString, QString> &info)
 {
     QStatusBar *stat = statusBar();
-    QLabel *cpu = new QLabel(info.value("model name"));
 
-    stat->addWidget(cpu);
+    statCpuInfo->setText(info.value("model name"));
 
     QString result;
 

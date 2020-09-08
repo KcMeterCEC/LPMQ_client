@@ -10,6 +10,7 @@ class Commander;
 class QMessageBox;
 class QSpinBox;
 class QTimer;
+class QLabel;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -26,6 +27,7 @@ private:
     QMessageBox             *msg = nullptr;
     QSpinBox                *period = nullptr;
     QTimer                  *refreshTimer = nullptr;
+    QLabel                  *statCpuInfo = nullptr;
 
     void toolBarsCreate(void);
     void msgCreate(void);
