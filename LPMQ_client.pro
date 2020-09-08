@@ -18,11 +18,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     MainWindow.cpp \
     control/commander.cpp \
-    main.cpp
+    main.cpp \
+    rb.cpp
 
 HEADERS += \
     MainWindow.h \
-    control/commander.h
+    control/commander.h \
+    rb.h
 
 QT += network
 #

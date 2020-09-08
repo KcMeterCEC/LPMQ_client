@@ -7,6 +7,9 @@
 #include <QGridLayout>
 #include <QSettings>
 #include <QMessageBox>
+#include <QSpinBox>
+#include <QTimer>
+#include <QStatusBar>
 #include <QDebug>
 
 #include "MainWindow.h"
@@ -16,13 +19,16 @@ MainWindow::MainWindow(QMainWindow *parent)
     : QMainWindow(parent),
       dockManager(new ads::CDockManager(this)),
       userCfg(new QSettings("kcmetercec", "lpmq")),
-      msg(new QMessageBox)
+      msg(new QMessageBox),
+      period(new QSpinBox(this)),
+      refreshTimer(new QTimer(this))
 {
     setWindowIcon(QIcon(":/images/basic/monitor.png"));
     setMinimumSize(960, 540);
 
     cmd = Commander::getInstance();
     connect(cmd, &Commander::connectChanged, this, &MainWindow::connectMsg);
+    connect(cmd, &Commander::resultSysInfo, this, &MainWindow::showSysInfo);
 
     toolBarsCreate();
     msgCreate();
@@ -36,10 +42,31 @@ MainWindow::~MainWindow()
 void MainWindow::toolBarsCreate(void)
 {
     QToolBar *toolBar = addToolBar(tr("tools"));
+
     connectTool = toolBar->addAction("connect");
     refreshConnectStatus();
-
     connect(connectTool, &QAction::triggered, this, &MainWindow::connectSet);
+
+    period->setValue(5);
+    period->setRange(1, 60);
+    period->setAlignment(Qt::AlignCenter);
+    period->setToolTip(tr("The cycle of request"));
+    toolBar->addWidget(period);
+    connect(period, SIGNAL(valueChanged(int)), this, SLOT(periodChanged(int)));
+    connect(refreshTimer, &QTimer::timeout, this, &MainWindow::execRequest);
+    resetTimerPeriod(period->value());
+}
+void MainWindow::resetTimerPeriod(int val)
+{
+    refreshTimer->setInterval(val * 1000);
+}
+void MainWindow::periodChanged(int val)
+{
+    resetTimerPeriod(val);
+}
+void MainWindow::execRequest(void)
+{
+
 }
 void MainWindow::msgCreate(void)
 {
@@ -121,12 +148,36 @@ void MainWindow::connectSet(bool checked)
         requestConnect();
     }
 }
+void MainWindow::showSysInfo(const QMap<QString, QString> &info)
+{
+    QStatusBar *stat = statusBar();
+    QLabel *cpu = new QLabel(info.value("model name"));
+
+    stat->addWidget(cpu);
+
+    QString result;
+
+    QMap<QString, QString>::const_iterator i = info.constBegin();
+    while (i != info.constEnd())
+    {
+        result += i.key() + ": " + i.value();
+        ++i;
+        if(i != info.constEnd())
+        {
+            result += "\n";
+        }
+    }
+    stat->setToolTip(result);
+}
 void MainWindow::refreshConnectStatus(void)
 {
     if(cmd->connectStatus())
     {
         connectTool->setIcon(QIcon(":/images/basic/disconnect.png"));
         connectTool->setToolTip(tr("disconnect from server"));
+
+        refreshTimer->start();
+        cmd->requestSysInfo();
     }
     else
     {
