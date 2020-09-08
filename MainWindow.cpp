@@ -11,6 +11,8 @@
 #include <QTimer>
 #include <QStatusBar>
 #include <QMenuBar>
+#include <QPolygonF>
+#include <QPointF>
 #include <QDebug>
 
 #include "MainWindow.h"
@@ -75,6 +77,7 @@ void MainWindow::widgetCreate(void)
     menu->addAction(dockWidget->toggleViewAction());
     psCurve->setAxisTitle("time elaspe", "%");
     psCurve->setAxisType(SscaleDraw::TIME);
+    psCurve->show();
 
     dockManager->addDockWidget(ads::TopDockWidgetArea, dockWidget);
 }
@@ -88,6 +91,7 @@ void MainWindow::periodChanged(int val)
 }
 void MainWindow::execRequest(void)
 {
+    timeElaspe += refreshTimer->interval() / 1000;
     cmd->requestCpuUsage();
 }
 void MainWindow::msgCreate(void)
@@ -200,7 +204,6 @@ void MainWindow::refreshConnectStatus(void)
     {
         connectTool->setIcon(QIcon(":/images/basic/disconnect.png"));
         connectTool->setToolTip(tr("disconnect from server"));
-
         refreshTimer->start();
         cmd->requestSysInfo();
     }
@@ -224,15 +227,23 @@ void MainWindow::showCpuUsage(const QMap<QString, double> &info)
     int cpuCnt = static_cast<int>(info.value("cpu count"));
     if(psCurveData.size() != cpuCnt)
     {
-        qDebug() << "set curve size " << cpuCnt;
-
         psCurveData.resize(cpuCnt);
 
         QVector<QString> lines;
         for(int i = 0; i < cpuCnt; ++i)
         {
+            psCurveData[i].resize(1);
             lines.push_back(QString("cpu%1").arg(i));
         }
         psCurve->setCurvesNum(lines);
     }
+
+    for(int i = 0; i < cpuCnt; ++i)
+    {
+        psCurveData[i][0] = QPointF(timeElaspe,
+                                    info.value(QString("cpu%1.usage").arg(i))
+                                    );
+    }
+    qDebug() << "data: " << psCurveData;
+    psCurve->addData(psCurveData);
 }

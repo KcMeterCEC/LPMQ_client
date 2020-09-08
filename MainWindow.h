@@ -33,6 +33,7 @@ private:
     QLabel                  *statCpuInfo = nullptr;
     StatisticCurve          *psCurve = nullptr;
     QVector<QPolygonF>      psCurveData;
+    quint64                 timeElaspe = 0;
 
     void toolBarsCreate(void);
     void msgCreate(void);
