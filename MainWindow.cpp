@@ -14,6 +14,7 @@
 
 #include "MainWindow.h"
 #include "control/commander.h"
+#include "control/targetps.h"
 
 MainWindow::MainWindow(QMainWindow *parent)
     : QMainWindow(parent),
@@ -29,6 +30,9 @@ MainWindow::MainWindow(QMainWindow *parent)
     cmd = Commander::getInstance();
     connect(cmd, &Commander::connectChanged, this, &MainWindow::connectMsg);
     connect(cmd, &Commander::resultSysInfo, this, &MainWindow::showSysInfo);
+
+    ps = TargetPs::getInstance();
+    connect(ps, &TargetPs::resultCpuUsage, this, &MainWindow::showCpuUsage);
 
     toolBarsCreate();
     msgCreate();
@@ -66,7 +70,7 @@ void MainWindow::periodChanged(int val)
 }
 void MainWindow::execRequest(void)
 {
-
+    cmd->requestCpuUsage();
 }
 void MainWindow::msgCreate(void)
 {
@@ -196,4 +200,8 @@ void MainWindow::connectMsg(bool isCon, const QString &str)
     {
         msgError(str);
     }
+}
+void MainWindow::showCpuUsage(const QMap<QString, double> &info)
+{
+    qDebug() << info;
 }

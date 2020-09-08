@@ -3,6 +3,7 @@
 
 #include "commander.h"
 #include "rb.h"
+#include "targetps.h"
 
 Commander::Commander(QObject *parent) : QObject(parent),
     socket(new QTcpSocket(this)),
@@ -12,6 +13,8 @@ Commander::Commander(QObject *parent) : QObject(parent),
     connect(socket, SIGNAL(connected()), this, SLOT(hasConnected()));
     connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
                 this, SLOT(hasErr(QAbstractSocket::SocketError)));
+
+    ps = TargetPs::getInstance();
 }
 Commander::~Commander()
 {
@@ -68,6 +71,7 @@ void Commander::recvData(void)
                 }break;
                 case CLASS_PS:
                 {
+                    ps->execCpuCmd(socketBuf);
                 }break;
                 case CLASS_MEM:
                 {
@@ -128,6 +132,16 @@ void Commander::requestSysInfo(void)
 
     sendHead.cmd = CLASS_INFO;
     sendHead.payload_len = 0;
+    send2Server(sendHead);
+}
+void Commander::requestCpuUsage(void)
+{
+    if(!isConnected) return;
+
+    Header sendHead;
+
+    sendHead.cmd = CLASS_PS;
+    sendHead.payload_len = ps->requestCpuStat(sendBuf);
     send2Server(sendHead);
 }
 bool Commander::send2Server(Header &sendHead)

@@ -11,6 +11,7 @@ class QMessageBox;
 class QSpinBox;
 class QTimer;
 class QLabel;
+class TargetPs;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -23,6 +24,7 @@ private:
     ads::CDockManager       *dockManager = nullptr;
     QSettings               *userCfg = nullptr;
     Commander               *cmd = nullptr;
+    TargetPs                *ps = nullptr;
     QAction                 *connectTool = nullptr;
     QMessageBox             *msg = nullptr;
     QSpinBox                *period = nullptr;
@@ -44,5 +46,6 @@ private slots:
     void execRequest(void);
 
     void showSysInfo(const QMap<QString, QString> &info);
+    void showCpuUsage(const QMap<QString, double> &info);
 };
 #endif // MAINWINDOW_H
