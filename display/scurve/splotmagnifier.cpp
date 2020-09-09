@@ -17,9 +17,6 @@ void SplotMagnifier::rescale( double factor )
     QwtPlot* plt = plot();
     if ( plt == NULL )
         return;
-
-    qDebug() << "factor " << factor;
-
     factor = qAbs( factor );
     if ( factor == 1.0 || factor == 0.0 )
         return;
@@ -55,17 +52,25 @@ void SplotMagnifier::rescale( double factor )
         v2 = scaleMap.invTransform( v2 );
     }
 
+    bool isAutoScale = false;
     if(v1 < xBottomMin)
     {
         v1 = xBottomMin;
+        isAutoScale = true;
     }
     if(v2 > xBottomMax)
     {
         v2 = xBottomMax;
+        isAutoScale = true;
     }
 
     plt->setAxisScale( QwtPlot::xBottom, v1, v2 );
     doReplot = true;
+
+    if(isAutoScale)
+    {
+        plt->setAxisAutoScale(QwtPlot::xBottom, true);
+    }
 
     plt->setAutoReplot( autoReplot );
 
