@@ -75,6 +75,7 @@ void StatisticCurve::addData(const QVector<QPolygonF> &data)
         }
         curves[i]->setSamples(curvesData[i]);
     }
+    plot->replot();
 }
 void StatisticCurve::clearCurvesData(void)
 {
