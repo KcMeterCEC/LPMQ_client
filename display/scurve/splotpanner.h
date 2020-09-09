@@ -7,6 +7,13 @@ class SplotPanner : public QwtPlotPanner
 {
 public:
     SplotPanner(QWidget * parent = nullptr);
+
+    void setXRange(qreal min, qreal max);
+protected:
+    void moveCanvas( int dx, int dy ) override;
+private:
+    qreal xBottomMin = 0;
+    qreal xBottomMax = 0;
 };
 
 #endif // SPLOTPANNER_H
