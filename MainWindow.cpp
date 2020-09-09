@@ -32,7 +32,7 @@ MainWindow::MainWindow(QMainWindow *parent)
       psCurve(new StatisticCurve(tr("history of cpu usage")))
 {
     setWindowIcon(QIcon(":/images/basic/monitor.png"));
-    setMinimumSize(960, 540);
+    setMinimumSize(960, 640);
 
     cmd = Commander::getInstance();
     connect(cmd, &Commander::connectChanged, this, &MainWindow::connectMsg);
@@ -77,7 +77,6 @@ void MainWindow::widgetCreate(void)
     menu->addAction(dockWidget->toggleViewAction());
     psCurve->setAxisTitle("time elaspe", "%");
     psCurve->setAxisType(SscaleDraw::TIME);
-    psCurve->show();
 
     dockManager->addDockWidget(ads::TopDockWidgetArea, dockWidget);
 }
@@ -244,6 +243,5 @@ void MainWindow::showCpuUsage(const QMap<QString, double> &info)
                                     info.value(QString("cpu%1.usage").arg(i))
                                     );
     }
-    qDebug() << "data: " << psCurveData;
     psCurve->addData(psCurveData);
 }

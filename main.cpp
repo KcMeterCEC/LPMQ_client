@@ -5,6 +5,8 @@
 #include <QSplashScreen>
 #include <QDebug>
 
+#define USE_STYLESHEET  (0)
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -13,6 +15,7 @@ int main(int argc, char *argv[])
     QSplashScreen splash(pixmap);
     splash.show();
 
+#if USE_STYLESHEET
     QFile f(":qdarkstyle/style.qss");
     if(!f.exists())
     {
@@ -24,6 +27,7 @@ int main(int argc, char *argv[])
         QTextStream ts(&f);
         qApp->setStyleSheet(ts.readAll());
     }
+#endif
 
     MainWindow w;
     w.show();
