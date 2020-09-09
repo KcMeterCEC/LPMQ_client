@@ -75,8 +75,11 @@ void StatisticCurve::addData(const QVector<QPolygonF> &data)
         }
         curves[i]->setSamples(curvesData[i]);
     }
-    panner->setXRange(curvesData[0][0].rx(),
-            curvesData[0][curvesData[0].size() - 1].rx());
+    qreal min = curvesData[0][0].rx();
+    qreal max = curvesData[0][curvesData[0].size() - 1].rx();
+
+    panner->setXRange(min, max);
+    magnifier->setXRange(min, max);
     plot->replot();
 }
 void StatisticCurve::clearCurvesData(void)

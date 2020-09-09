@@ -14,6 +14,10 @@ protected:
 private:
     qreal xBottomMin = 0;
     qreal xBottomMax = 0;
+
+    qreal d1Tmp = 0;
+    qreal d2Tmp = 0;
+    bool initialized = false;
 };
 
 #endif // SPLOTPANNER_H

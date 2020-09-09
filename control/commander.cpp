@@ -1,4 +1,5 @@
 #include <QtNetwork/QTcpSocket>
+#include <QNetworkProxyFactory>
 #include <QDebug>
 
 #include "commander.h"
@@ -9,6 +10,7 @@ Commander::Commander(QObject *parent) : QObject(parent),
     socket(new QTcpSocket(this)),
     recvBuf(new Rb(sizeof(socketBuf)))
 {
+    QNetworkProxyFactory::setUseSystemConfiguration(false);
     connect(socket, &QTcpSocket::readyRead, this, &Commander::recvData);
     connect(socket, SIGNAL(connected()), this, SLOT(hasConnected()));
     connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),

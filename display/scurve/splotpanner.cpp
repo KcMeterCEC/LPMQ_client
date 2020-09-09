@@ -35,10 +35,34 @@ void SplotPanner::moveCanvas( int dx, int dy )
 
     d1 = map.invTransform( p1 - dx );
     d2 = map.invTransform( p2 - dx );
-    if((d1 > xBottomMin) && (d2 < xBottomMax))
+
+    if(!initialized)
     {
-        plot->setAxisScale( QwtPlot::xBottom, d1, d2 );
+        initialized = true;
+
+        d1Tmp = d1;
+        d2Tmp = d2;
     }
+
+    if(d1 < xBottomMin)
+    {
+        qreal diff = xBottomMin - d1Tmp;
+
+        d1 = xBottomMin;
+        d2 = d2Tmp + diff;
+    }
+    if(d2 > xBottomMax)
+    {
+        qreal diff = xBottomMax - d2Tmp;
+
+        d2 = xBottomMax;
+        d1 = d1Tmp + diff;
+    }
+
+    d1Tmp = d1;
+    d2Tmp = d2;
+
+    plot->setAxisScale( QwtPlot::xBottom, d1, d2 );
 
     plot->setAutoReplot( doAutoReplot );
     plot->replot();
