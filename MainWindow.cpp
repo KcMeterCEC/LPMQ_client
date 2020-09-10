@@ -82,6 +82,7 @@ void MainWindow::widgetCreate(void)
     QMenuBar *menu = menuBar();
 
     ads::CDockWidget *psDockWidget = new ads::CDockWidget(tr("PS overview"));
+    psDockWidget->setIcon(QIcon(":/images/basic/process.png"));
     psDockWidget->setWidget(psCurve);
     menu->addAction(psDockWidget->toggleViewAction());
     psCurve->setAxisTitle(tr("time elaspe"), "%");
@@ -90,6 +91,7 @@ void MainWindow::widgetCreate(void)
     dockManager->addDockWidget(ads::TopDockWidgetArea, psDockWidget);
 
     ads::CDockWidget *memDockWidget = new ads::CDockWidget(tr("Memory overview"));
+    memDockWidget->setIcon(QIcon(":/images/basic/memory.png"));
     memDockWidget->setWidget(memCurve);
     menu->addAction(memDockWidget->toggleViewAction());
 

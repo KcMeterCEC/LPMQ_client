@@ -5,5 +5,7 @@
         <file>basic/connect.png</file>
         <file>basic/disconnect.png</file>
         <file>basic/clear.png</file>
+        <file>basic/memory.png</file>
+        <file>basic/process.png</file>
     </qresource>
 </RCC>
