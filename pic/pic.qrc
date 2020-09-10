@@ -4,5 +4,6 @@
         <file>basic/monitor.png</file>
         <file>basic/connect.png</file>
         <file>basic/disconnect.png</file>
+        <file>basic/clear.png</file>
     </qresource>
 </RCC>

@@ -60,9 +60,13 @@ void MainWindow::toolBarsCreate(void)
 {
     QToolBar *toolBar = addToolBar(tr("tools"));
 
-    connectTool = toolBar->addAction("connect");
+    connectTool = toolBar->addAction(tr("connect"));
     refreshConnectStatus();
     connect(connectTool, &QAction::triggered, this, &MainWindow::connectSet);
+
+    clearTool = toolBar->addAction(tr("clear data of curves"));
+    clearTool->setIcon(QIcon(":/images/basic/clear.png"));
+    connect(clearTool, &QAction::triggered, this, &MainWindow::clearCurves);
 
     period->setValue(5);
     period->setRange(1, 60);
@@ -77,15 +81,15 @@ void MainWindow::widgetCreate(void)
 {
     QMenuBar *menu = menuBar();
 
-    ads::CDockWidget *psDockWidget = new ads::CDockWidget("PS overview");
+    ads::CDockWidget *psDockWidget = new ads::CDockWidget(tr("PS overview"));
     psDockWidget->setWidget(psCurve);
     menu->addAction(psDockWidget->toggleViewAction());
-    psCurve->setAxisTitle("time elaspe", "%");
+    psCurve->setAxisTitle(tr("time elaspe"), "%");
     psCurve->setAxisType(SscaleDraw::TIME);
 
     dockManager->addDockWidget(ads::TopDockWidgetArea, psDockWidget);
 
-    ads::CDockWidget *memDockWidget = new ads::CDockWidget("Memory overview");
+    ads::CDockWidget *memDockWidget = new ads::CDockWidget(tr("Memory overview"));
     memDockWidget->setWidget(memCurve);
     menu->addAction(memDockWidget->toggleViewAction());
 
@@ -228,6 +232,12 @@ void MainWindow::refreshConnectStatus(void)
         connectTool->setIcon(QIcon(":/images/basic/connect.png"));
         connectTool->setToolTip(tr("connect to server"));
     }
+}
+void MainWindow::clearCurves(void)
+{
+    psCurve->clearCurvesData();
+    memCurve->clearCurvesData();
+    timeElaspe = 0;
 }
 void MainWindow::connectMsg(bool isCon, const QString &str)
 {

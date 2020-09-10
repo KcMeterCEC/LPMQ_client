@@ -29,6 +29,7 @@ private:
     TargetPs                *ps = nullptr;
     TargetMem               *mem = nullptr;
     QAction                 *connectTool = nullptr;
+    QAction                 *clearTool = nullptr;
     QMessageBox             *msg = nullptr;
     QSpinBox                *period = nullptr;
     QTimer                  *refreshTimer = nullptr;
@@ -47,6 +48,7 @@ private:
     void msgError(const QString &str);
     void msgInfo(const QString &str);
     void resetTimerPeriod(int val);
+    void clearCurves(void);
 private slots:
     void connectSet(bool checked);
     void connectMsg(bool isCon, const QString &str);
