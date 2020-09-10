@@ -14,6 +14,9 @@ int Smarker::rtti() const
 void Smarker::draw(QPainter *painter,
         const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRectF & canvasRect) const
 {
+    Q_UNUSED(xMap);
+    Q_UNUSED(yMap);
+
     drawCenterLine(painter, canvasRect);
     drawContents(painter, canvasRect);
 }

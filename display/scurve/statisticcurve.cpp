@@ -16,9 +16,9 @@
 StatisticCurve::StatisticCurve(const QString &title, bool brush, QWidget *parent) :
     QWidget(parent),
     plot(new Splot(title, this)),
-    hasBrush(brush),
     marker (new Smarker()),
-    Xscale (new SscaleDraw(QTime(0, 0, 0)))
+    Xscale (new SscaleDraw(QTime(0, 0, 0))),
+    hasBrush(brush)
 {
     marker->attach(plot);
     plot->setAxisScaleDraw( QwtPlot::xBottom, Xscale);

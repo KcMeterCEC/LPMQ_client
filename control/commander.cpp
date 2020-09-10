@@ -28,7 +28,7 @@ Commander::~Commander()
 void Commander::recvData(void)
 {
     QByteArray recv = socket->readAll();
-    if(recv.size() >= sizeof(socketBuf))
+    if(recv.size() >= static_cast<int>(sizeof(socketBuf)))
     {
         qFatal("Received size of data is out of range: %d\n", recv.size());
     }
