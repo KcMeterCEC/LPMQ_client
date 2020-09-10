@@ -38,6 +38,8 @@ StatisticCurve::StatisticCurve(const QString &title, bool brush, QWidget *parent
     setLayout(layout);
 
     setMouseTracking(true);
+
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 }
 void StatisticCurve::setCurvesNum(const QVector<QString> &cs)
 {

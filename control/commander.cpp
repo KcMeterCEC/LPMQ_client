@@ -5,6 +5,7 @@
 #include "commander.h"
 #include "rb.h"
 #include "targetps.h"
+#include "targetmem.h"
 
 Commander::Commander(QObject *parent) : QObject(parent),
     socket(new QTcpSocket(this)),
@@ -17,6 +18,7 @@ Commander::Commander(QObject *parent) : QObject(parent),
                 this, SLOT(hasErr(QAbstractSocket::SocketError)));
 
     ps = TargetPs::getInstance();
+    mem = TargetMem::getInstance();
 }
 Commander::~Commander()
 {
@@ -77,6 +79,7 @@ void Commander::recvData(void)
                 }break;
                 case CLASS_MEM:
                 {
+                    mem->execMemCmd(socketBuf);
                 }break;
                 case CLASS_IO:
                 {
@@ -144,6 +147,15 @@ void Commander::requestCpuUsage(void)
 
     sendHead.cmd = CLASS_PS;
     sendHead.payload_len = ps->requestCpuStat(sendBuf);
+    send2Server(sendHead);
+}
+void Commander::requestMemUsage(void)
+{
+    if(!isConnected) return;
+    Header sendHead;
+
+    sendHead.cmd = CLASS_MEM;
+    sendHead.payload_len = mem->requestMemStat(sendBuf);
     send2Server(sendHead);
 }
 bool Commander::send2Server(Header &sendHead)

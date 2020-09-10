@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     MainWindow.cpp \
     control/commander.cpp \
+    control/targetmem.cpp \
     control/targetps.cpp \
     display/scurve/slegend.cpp \
     display/scurve/smarker.cpp \
@@ -35,6 +36,7 @@ SOURCES += \
 HEADERS += \
     MainWindow.h \
     control/commander.h \
+    control/targetmem.h \
     control/targetps.h \
     display/scurve/slegend.h \
     display/scurve/smarker.h \

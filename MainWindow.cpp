@@ -20,6 +20,7 @@
 #include "DockWidget.h"
 #include "control/commander.h"
 #include "control/targetps.h"
+#include "control/targetmem.h"
 #include "display/scurve/statisticcurve.h"
 
 MainWindow::MainWindow(QMainWindow *parent)
@@ -29,10 +30,11 @@ MainWindow::MainWindow(QMainWindow *parent)
       msg(new QMessageBox),
       period(new QSpinBox(this)),
       refreshTimer(new QTimer(this)),
-      psCurve(new StatisticCurve(tr("history of cpu usage")))
+      psCurve(new StatisticCurve(tr("history of cpu usage"))),
+      memCurve(new StatisticCurve(tr("history of memory usage"), true))
 {
     setWindowIcon(QIcon(":/images/basic/monitor.png"));
-    setMinimumSize(960, 640);
+    setMinimumSize(960, 540);
 
     cmd = Commander::getInstance();
     connect(cmd, &Commander::connectChanged, this, &MainWindow::connectMsg);
@@ -40,6 +42,9 @@ MainWindow::MainWindow(QMainWindow *parent)
 
     ps = TargetPs::getInstance();
     connect(ps, &TargetPs::resultCpuUsage, this, &MainWindow::showCpuUsage);
+
+    mem = TargetMem::getInstance();
+    connect(mem, &TargetMem::resultMemUsage, this, &MainWindow::showMemUsage);
 
     toolBarsCreate();
     msgCreate();
@@ -72,13 +77,24 @@ void MainWindow::widgetCreate(void)
 {
     QMenuBar *menu = menuBar();
 
-    ads::CDockWidget *dockWidget = new ads::CDockWidget("PS overview");
-    dockWidget->setWidget(psCurve);
-    menu->addAction(dockWidget->toggleViewAction());
+    ads::CDockWidget *psDockWidget = new ads::CDockWidget("PS overview");
+    psDockWidget->setWidget(psCurve);
+    menu->addAction(psDockWidget->toggleViewAction());
     psCurve->setAxisTitle("time elaspe", "%");
     psCurve->setAxisType(SscaleDraw::TIME);
 
-    dockManager->addDockWidget(ads::TopDockWidgetArea, dockWidget);
+    dockManager->addDockWidget(ads::TopDockWidgetArea, psDockWidget);
+
+    ads::CDockWidget *memDockWidget = new ads::CDockWidget("Memory overview");
+    memDockWidget->setWidget(memCurve);
+    menu->addAction(memDockWidget->toggleViewAction());
+
+    QVector<QString> lines({"used", "buffers", "cached", "free"});
+    memCurve->setCurvesNum(lines);
+    memCurve->setAxisTitle("time elaspe", "MByte");
+    memCurve->setAxisType(SscaleDraw::TIME);
+
+    dockManager->addDockWidget(ads::BottomDockWidgetArea, memDockWidget);
 }
 void MainWindow::resetTimerPeriod(int val)
 {
@@ -92,6 +108,7 @@ void MainWindow::execRequest(void)
 {
     timeElaspe += refreshTimer->interval() / 1000;
     cmd->requestCpuUsage();
+    cmd->requestMemUsage();
 }
 void MainWindow::msgCreate(void)
 {
@@ -244,4 +261,19 @@ void MainWindow::showCpuUsage(const QMap<QString, double> &info)
                                     );
     }
     psCurve->addData(psCurveData);
+}
+void MainWindow::showMemUsage(const QMap<QString, double> &info)
+{
+    QVector<QPolygonF> usage;
+    usage.resize(4);
+
+    usage[0].push_back(QPointF(timeElaspe, info.value("mem.used")));
+    usage[1].push_back(QPointF(timeElaspe,
+    info.value("mem.used") + info.value("mem.buffers")));
+    usage[2].push_back(QPointF(timeElaspe,
+    info.value("mem.used") + info.value("mem.buffers") + info.value("mem.cache")));
+    usage[3].push_back(QPointF(timeElaspe,
+    info.value("mem.total")));
+
+    memCurve->addData(usage);
 }

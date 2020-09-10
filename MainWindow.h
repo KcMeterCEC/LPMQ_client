@@ -12,6 +12,7 @@ class QSpinBox;
 class QTimer;
 class QLabel;
 class TargetPs;
+class TargetMem;
 class StatisticCurve;
 class MainWindow : public QMainWindow
 {
@@ -26,6 +27,7 @@ private:
     QSettings               *userCfg = nullptr;
     Commander               *cmd = nullptr;
     TargetPs                *ps = nullptr;
+    TargetMem               *mem = nullptr;
     QAction                 *connectTool = nullptr;
     QMessageBox             *msg = nullptr;
     QSpinBox                *period = nullptr;
@@ -33,6 +35,7 @@ private:
     QLabel                  *statCpuInfo = nullptr;
     StatisticCurve          *psCurve = nullptr;
     QVector<QPolygonF>      psCurveData;
+    StatisticCurve          *memCurve = nullptr;
     quint64                 timeElaspe = 0;
 
     void toolBarsCreate(void);
@@ -52,5 +55,6 @@ private slots:
 
     void showSysInfo(const QMap<QString, QString> &info);
     void showCpuUsage(const QMap<QString, double> &info);
+    void showMemUsage(const QMap<QString, double> &info);
 };
 #endif // MAINWINDOW_H
