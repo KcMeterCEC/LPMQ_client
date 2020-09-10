@@ -21,6 +21,7 @@
 #include "control/commander.h"
 #include "control/targetps.h"
 #include "control/targetmem.h"
+#include "control/targetio.h"
 #include "display/scurve/statisticcurve.h"
 
 MainWindow::MainWindow(QMainWindow *parent)
@@ -31,7 +32,8 @@ MainWindow::MainWindow(QMainWindow *parent)
       period(new QSpinBox(this)),
       refreshTimer(new QTimer(this)),
       psCurve(new StatisticCurve(tr("history of cpu usage"))),
-      memCurve(new StatisticCurve(tr("history of memory usage"), true))
+      memCurve(new StatisticCurve(tr("history of memory usage"), true)),
+      ioCurve(new StatisticCurve(tr("history of io usage")))
 {
     setWindowIcon(QIcon(":/images/basic/monitor.png"));
     setMinimumSize(960, 540);
@@ -45,6 +47,10 @@ MainWindow::MainWindow(QMainWindow *parent)
 
     mem = TargetMem::getInstance();
     connect(mem, &TargetMem::resultMemUsage, this, &MainWindow::showMemUsage);
+
+    io = TargetIo::getInstance();
+    connect(io, &TargetIo::resultIoUsage, this, &MainWindow::showIoUsage);
+
 
     toolBarsCreate();
     msgCreate();
@@ -101,6 +107,15 @@ void MainWindow::widgetCreate(void)
     memCurve->setAxisType(SscaleDraw::TIME);
 
     dockManager->addDockWidget(ads::BottomDockWidgetArea, memDockWidget);
+
+    ads::CDockWidget *ioDockWidget = new ads::CDockWidget(tr("IO overview"));
+    ioDockWidget->setIcon(QIcon(":/images/basic/io.png"));
+    ioDockWidget->setWidget(ioCurve);
+    menu->addAction(ioDockWidget->toggleViewAction());
+    ioCurve->setAxisTitle(tr("time elaspe"), "KB/s");
+    ioCurve->setAxisType(SscaleDraw::TIME);
+
+    dockManager->addDockWidget(ads::BottomDockWidgetArea, ioDockWidget);
 }
 void MainWindow::resetTimerPeriod(int val)
 {
@@ -115,6 +130,7 @@ void MainWindow::execRequest(void)
     timeElaspe += refreshTimer->interval() / 1000;
     cmd->requestCpuUsage();
     cmd->requestMemUsage();
+    cmd->requestIoUsage();
 }
 void MainWindow::msgCreate(void)
 {
@@ -288,4 +304,8 @@ void MainWindow::showMemUsage(const QMap<QString, double> &info)
     info.value("mem.total")));
 
     memCurve->addData(usage);
+}
+void MainWindow::showIoUsage(const QMap<QString, double> &info)
+{
+
 }

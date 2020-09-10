@@ -6,6 +6,7 @@
 #include "rb.h"
 #include "targetps.h"
 #include "targetmem.h"
+#include "targetio.h"
 
 Commander::Commander(QObject *parent) : QObject(parent),
     socket(new QTcpSocket(this)),
@@ -19,6 +20,7 @@ Commander::Commander(QObject *parent) : QObject(parent),
 
     ps = TargetPs::getInstance();
     mem = TargetMem::getInstance();
+    io = TargetIo::getInstance();
 }
 Commander::~Commander()
 {
@@ -156,6 +158,15 @@ void Commander::requestMemUsage(void)
 
     sendHead.cmd = CLASS_MEM;
     sendHead.payload_len = mem->requestMemStat(sendBuf);
+    send2Server(sendHead);
+}
+void Commander::requestIoUsage(void)
+{
+    if(!isConnected) return;
+    Header sendHead;
+
+    sendHead.cmd = CLASS_MEM;
+    sendHead.payload_len = io->requestIoStat(sendBuf);
     send2Server(sendHead);
 }
 bool Commander::send2Server(Header &sendHead)

@@ -7,5 +7,6 @@
         <file>basic/clear.png</file>
         <file>basic/memory.png</file>
         <file>basic/process.png</file>
+        <file>basic/io.png</file>
     </qresource>
 </RCC>

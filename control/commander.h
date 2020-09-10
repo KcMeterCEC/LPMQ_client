@@ -10,6 +10,7 @@ class QTcpSocket;
 class Rb;
 class TargetPs;
 class TargetMem;
+class TargetIo;
 class Commander : public QObject
 {
     Q_OBJECT
@@ -30,6 +31,8 @@ public:
     void requestCpuUsage(void);
 
     void requestMemUsage(void);
+
+    void requestIoUsage(void);
 private:
     explicit Commander(QObject *parent = nullptr);
     ~Commander();
@@ -77,6 +80,7 @@ private:
     char            sendBuf[1024];
     TargetPs        *ps;
     TargetMem       *mem;
+    TargetIo        *io;
 
     bool send2Server(Header &sendHead);
     void execSysInfo(const char *buf);
