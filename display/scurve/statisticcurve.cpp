@@ -91,6 +91,7 @@ void StatisticCurve::clearCurvesData(void)
         for(int i = 0; i < curvesData.size(); ++i)
         {
             curvesData[i].clear();
+            curves[i]->setSamples(curvesData[i]);
         }
     }
     refresh();
