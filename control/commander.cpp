@@ -85,7 +85,7 @@ void Commander::recvData(void)
                 }break;
                 case CLASS_IO:
                 {
-                    qDebug() << "get CLASS_IO";
+                    io->execIoCmd(socketBuf);
                 }break;
                 default:qFatal("unknown command!");break;
                 }
@@ -165,7 +165,7 @@ void Commander::requestIoUsage(void)
     if(!isConnected) return;
     Header sendHead;
 
-    sendHead.cmd = CLASS_MEM;
+    sendHead.cmd = CLASS_IO;
     sendHead.payload_len = io->requestIoStat(sendBuf);
     send2Server(sendHead);
 }
