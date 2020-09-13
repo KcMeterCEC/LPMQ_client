@@ -255,6 +255,7 @@ void MainWindow::clearCurves(void)
 {
     psCurve->clearCurvesData();
     memCurve->clearCurvesData();
+    ioCurve->clearCurvesData();
     timeElaspe = 0;
 }
 void MainWindow::connectMsg(bool isCon, const QString &str)
@@ -305,7 +306,36 @@ void MainWindow::showMemUsage(const QMap<QString, double> &info)
 
     memCurve->addData(usage);
 }
-void MainWindow::showIoUsage(const QMap<QString, double> &info)
+void MainWindow::showIoUsage(const QMap<QString, double> &info, const QStringList &name)
 {
+    if(diskCnt != name.size())
+    {
+        diskCnt = name.size();
 
+        QVector<QString> lines;
+        for(int i = 0; i < diskCnt; ++i)
+        {
+            lines.push_back(name.at(i));
+        }
+        ioCurve->setCurvesNum(lines);
+    }
+
+    QVector<QPolygonF> speed;
+    QString currentName;
+    speed.resize(diskCnt);
+    for(int i = 0; i < diskCnt / 2; ++i)
+    {
+        currentName = name.at(i);
+        speed[2 * i].push_back(QPointF(timeElaspe,
+                                       info.value(currentName)
+                                       ));
+        speed[2 * i + 1].push_back(QPointF(timeElaspe,
+                                  info.value(currentName)
+                                  ));
+
+        qDebug() << currentName << "r_kb " << speed[2 * i] << "w_kb " << speed[2 * i + 1];
+    }
+    qDebug() << info;
+
+    ioCurve->addData(speed);
 }

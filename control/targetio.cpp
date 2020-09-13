@@ -86,8 +86,64 @@ quint8 TargetIo::requestIoStat(char *buf)
  */
 void TargetIo::execIoStat(const QString &ret)
 {
-    qDebug() << ret;
+    const char *rPrefix = " read";
+    const char *wPrefix = " write";
     QMap<QString, double> stat;
+    QStringList name;
 
-    emit resultIoUsage(stat);
+    //! 1. get line
+    QStringList list = ret.split(QRegExp("[\n]"));
+    list.removeAll("");
+    //! 2. name filter
+    for(auto &l : list)
+    {
+        if(partFilter(l))
+        {
+            qDebug() << l;
+            QStringList ioList = l.simplified().split(' ');
+
+            if(statBk.contains(QString(ioList[2] + rPrefix)))
+            {
+                name.push_back(ioList[2] + rPrefix);
+                name.push_back(ioList[2] + wPrefix);
+                stat[ioList[2] + rPrefix] = (ioList[5].toInt() - statBk.value(ioList[2] + rPrefix)) / 2;
+                stat[ioList[2] + wPrefix] = (ioList[9].toInt() - statBk.value(ioList[2] + wPrefix)) / 2;
+
+                qDebug() << ioList[2] << "read : " << ioList[5].toInt() << "write : " << ioList[9].toInt();
+                qDebug() << ioList[2] << "readbk : " << statBk.value(ioList[2] + rPrefix) << "write : " << statBk.value(ioList[2] + wPrefix);
+                qDebug() << ioList[2] << "read(kb): " << stat[ioList[2] + rPrefix] <<
+                "write(kb) " << stat[ioList[2] + wPrefix];
+            }
+
+            statBk[ioList[2] + rPrefix] = ioList[5].toInt();
+            statBk[ioList[2] + wPrefix] = ioList[9].toInt();
+        }
+    }
+
+    if((!statBk.isEmpty()) && (!stat.isEmpty()))
+    {
+        emit resultIoUsage(stat, name);
+    }
+}
+bool TargetIo::partFilter(const QString &str)
+{
+    bool ret = false;
+    if(str.contains("hd") || str.contains("sd"))
+    {
+        int idx = str.indexOf('d');
+        if(str[idx + 2].isSpace())
+        {
+            ret = true;
+        }
+    }
+    else if(str.contains("mmcblk"))
+    {
+        int idx = str.indexOf('k');
+        if(str[idx + 2].isSpace())
+        {
+            ret = true;
+        }
+    }
+
+    return ret;
 }

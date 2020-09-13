@@ -2,6 +2,7 @@
 #define TARGETIO_H
 
 #include <QObject>
+#include <QMap>
 
 class TargetIo : public QObject
 {
@@ -26,9 +27,12 @@ private:
         IO_STAT,
     }ioCmd;
 
+    QMap<QString, int> statBk;
+
     void execIoStat(const QString &ret);
+    bool partFilter(const QString &str);
 signals:
-    void resultIoUsage(const QMap<QString, double> &info);
+    void resultIoUsage(const QMap<QString, double> &info, const QStringList &name);
 };
 
 #endif // TARGETIO_H

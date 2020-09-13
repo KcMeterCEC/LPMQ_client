@@ -40,6 +40,7 @@ private:
     QVector<QPolygonF>      psCurveData;
     StatisticCurve          *memCurve = nullptr;
     StatisticCurve          *ioCurve = nullptr;
+    int                     diskCnt;
     quint64                 timeElaspe = 0;
 
     void toolBarsCreate(void);
@@ -61,6 +62,6 @@ private slots:
     void showSysInfo(const QMap<QString, QString> &info);
     void showCpuUsage(const QMap<QString, double> &info);
     void showMemUsage(const QMap<QString, double> &info);
-    void showIoUsage(const QMap<QString, double> &info);
+    void showIoUsage(const QMap<QString, double> &info, const QStringList &name);
 };
 #endif // MAINWINDOW_H
