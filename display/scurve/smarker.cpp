@@ -41,7 +41,7 @@ void Smarker::drawContents(QPainter *painter, const QRectF & canvasRect) const
     qreal w = canvasRect.width() / 3;
     qreal x = curveX - w / 2;
     qreal y = canvasRect.y() + gap;
-    qreal h = 20;
+    qreal h = canvasRect.height() / 10;
     w /= 2;
 
     if(isRight)
