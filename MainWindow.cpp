@@ -325,16 +325,18 @@ void MainWindow::showIoUsage(const QMap<QString, double> &info)
     QVector<QPolygonF> speed;
     QString currentName;
     speed.resize(diskCnt);
+
+    int timDiv = period->value();
     for(int i = 0; i < diskCnt / 2; ++i)
     {
         currentName = nameList.at(2 * i);
         speed[2 * i].push_back(QPointF(timeElaspe,
-                                       info.value(currentName)
+                                       info.value(currentName) / timDiv
                                        ));
+        currentName = nameList.at(2 * i + 1);
         speed[2 * i + 1].push_back(QPointF(timeElaspe,
-                                  info.value(currentName)
+                                  info.value(currentName) / timDiv
                                   ));
     }
-
     ioCurve->addData(speed);
 }
