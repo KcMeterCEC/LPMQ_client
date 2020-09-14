@@ -32,7 +32,7 @@ private:
     void execIoStat(const QString &ret);
     bool partFilter(const QString &str);
 signals:
-    void resultIoUsage(const QMap<QString, double> &info, const QStringList &name);
+    void resultIoUsage(const QMap<QString, double> &info);
 };
 
 #endif // TARGETIO_H

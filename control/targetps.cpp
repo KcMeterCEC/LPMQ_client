@@ -78,21 +78,36 @@ void TargetPs::execCpuStat(const QString &ret)
             {
                 totalTime += c.toInt();
             }
-            stat[cpuFind + (".user")] = (cpuList.at(0).toInt() - statBk.value(cpuFind + (".user"))) * 100 /
-                    (totalTime - statBk.value(cpuFind + (".total")));
-            stat[cpuFind + (".nice")] = (cpuList.at(1).toInt() - statBk.value(cpuFind + (".nice"))) * 100/
-                    (totalTime - statBk.value(cpuFind + (".total")));
-            stat[cpuFind + (".system")] = (cpuList.at(2).toInt() - statBk.value(cpuFind + (".system"))) * 100/
-                    (totalTime - statBk.value(cpuFind + (".total")));
-            stat[cpuFind + (".idle")] = (cpuList.at(3).toInt() - statBk.value(cpuFind + (".idle"))) * 100/
-                    (totalTime - statBk.value(cpuFind + (".total")));
-            stat[cpuFind + (".iowait")] = (cpuList.at(4).toInt() - statBk.value(cpuFind + (".iowait"))) * 100/
-                    (totalTime - statBk.value(cpuFind + (".total")));
-            stat[cpuFind + (".irq")] = (cpuList.at(5).toInt() - statBk.value(cpuFind + (".irq"))) * 100/
-                    (totalTime - statBk.value(cpuFind + (".total")));
-            stat[cpuFind + (".softirq")] = (cpuList.at(6).toInt() - statBk.value(cpuFind + (".softirq"))) * 100/
-                    (totalTime - statBk.value(cpuFind + (".total")));
-            stat[cpuFind + (".usage")] = 100 - stat.value(cpuFind + (".idle"));
+            if(statBk.contains(cpuFind + (".total")))
+            {
+                stat[cpuFind + (".user")] = (cpuList.at(0).toInt() - statBk.value(cpuFind + (".user"))) * 100 /
+                        (totalTime - statBk.value(cpuFind + (".total")));
+                stat[cpuFind + (".nice")] = (cpuList.at(1).toInt() - statBk.value(cpuFind + (".nice"))) * 100/
+                        (totalTime - statBk.value(cpuFind + (".total")));
+                stat[cpuFind + (".system")] = (cpuList.at(2).toInt() - statBk.value(cpuFind + (".system"))) * 100/
+                        (totalTime - statBk.value(cpuFind + (".total")));
+                stat[cpuFind + (".idle")] = (cpuList.at(3).toInt() - statBk.value(cpuFind + (".idle"))) * 100/
+                        (totalTime - statBk.value(cpuFind + (".total")));
+                stat[cpuFind + (".iowait")] = (cpuList.at(4).toInt() - statBk.value(cpuFind + (".iowait"))) * 100/
+                        (totalTime - statBk.value(cpuFind + (".total")));
+                stat[cpuFind + (".irq")] = (cpuList.at(5).toInt() - statBk.value(cpuFind + (".irq"))) * 100/
+                        (totalTime - statBk.value(cpuFind + (".total")));
+                stat[cpuFind + (".softirq")] = (cpuList.at(6).toInt() - statBk.value(cpuFind + (".softirq"))) * 100/
+                        (totalTime - statBk.value(cpuFind + (".total")));
+                stat[cpuFind + (".usage")] = 100 - stat.value(cpuFind + (".idle"));
+            }
+            else
+            {
+                stat[cpuFind + (".user")] = 0;
+                stat[cpuFind + (".nice")] = 0;
+                stat[cpuFind + (".system")] = 0;
+                stat[cpuFind + (".idle")] = 0;
+                stat[cpuFind + (".iowait")] = 0;
+                stat[cpuFind + (".irq")] = 0;
+                stat[cpuFind + (".softirq")] = 0;
+                stat[cpuFind + (".usage")] = 0;
+            }
+
             cpuCnt++;
 
             statBk[cpuFind + (".total")] = totalTime;

@@ -62,6 +62,6 @@ private slots:
     void showSysInfo(const QMap<QString, QString> &info);
     void showCpuUsage(const QMap<QString, double> &info);
     void showMemUsage(const QMap<QString, double> &info);
-    void showIoUsage(const QMap<QString, double> &info, const QStringList &name);
+    void showIoUsage(const QMap<QString, double> &info);
 };
 #endif // MAINWINDOW_H

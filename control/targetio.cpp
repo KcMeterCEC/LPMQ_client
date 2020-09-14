@@ -89,7 +89,6 @@ void TargetIo::execIoStat(const QString &ret)
     const char *rPrefix = " read";
     const char *wPrefix = " write";
     QMap<QString, double> stat;
-    QStringList name;
 
     //! 1. get line
     QStringList list = ret.split(QRegExp("[\n]"));
@@ -99,20 +98,19 @@ void TargetIo::execIoStat(const QString &ret)
     {
         if(partFilter(l))
         {
-            qDebug() << l;
             QStringList ioList = l.simplified().split(' ');
 
             if(statBk.contains(QString(ioList[2] + rPrefix)))
             {
-                name.push_back(ioList[2] + rPrefix);
-                name.push_back(ioList[2] + wPrefix);
-                stat[ioList[2] + rPrefix] = (ioList[5].toInt() - statBk.value(ioList[2] + rPrefix)) / 2;
-                stat[ioList[2] + wPrefix] = (ioList[9].toInt() - statBk.value(ioList[2] + wPrefix)) / 2;
-
-                qDebug() << ioList[2] << "read : " << ioList[5].toInt() << "write : " << ioList[9].toInt();
-                qDebug() << ioList[2] << "readbk : " << statBk.value(ioList[2] + rPrefix) << "write : " << statBk.value(ioList[2] + wPrefix);
-                qDebug() << ioList[2] << "read(kb): " << stat[ioList[2] + rPrefix] <<
-                "write(kb) " << stat[ioList[2] + wPrefix];
+                stat[ioList[2] + rPrefix] = static_cast<double>
+                        ((ioList[5].toInt() - statBk.value(ioList[2] + rPrefix))) / 2048;
+                stat[ioList[2] + wPrefix] = static_cast<double>
+                        ((ioList[9].toInt() - statBk.value(ioList[2] + wPrefix))) / 2048;
+            }
+            else
+            {
+                stat[ioList[2] + rPrefix] = 0;
+                stat[ioList[2] + wPrefix] = 0;
             }
 
             statBk[ioList[2] + rPrefix] = ioList[5].toInt();
@@ -120,9 +118,9 @@ void TargetIo::execIoStat(const QString &ret)
         }
     }
 
-    if((!statBk.isEmpty()) && (!stat.isEmpty()))
+    if(!statBk.isEmpty())
     {
-        emit resultIoUsage(stat, name);
+        emit resultIoUsage(stat);
     }
 }
 bool TargetIo::partFilter(const QString &str)

@@ -112,7 +112,7 @@ void MainWindow::widgetCreate(void)
     ioDockWidget->setIcon(QIcon(":/images/basic/io.png"));
     ioDockWidget->setWidget(ioCurve);
     menu->addAction(ioDockWidget->toggleViewAction());
-    ioCurve->setAxisTitle(tr("time elaspe"), "KB/s");
+    ioCurve->setAxisTitle(tr("time elaspe"), "MB/s");
     ioCurve->setAxisType(SscaleDraw::TIME);
 
     dockManager->addDockWidget(ads::BottomDockWidgetArea, ioDockWidget);
@@ -306,16 +306,18 @@ void MainWindow::showMemUsage(const QMap<QString, double> &info)
 
     memCurve->addData(usage);
 }
-void MainWindow::showIoUsage(const QMap<QString, double> &info, const QStringList &name)
+void MainWindow::showIoUsage(const QMap<QString, double> &info)
 {
-    if(diskCnt != name.size())
+    QList<QString> nameList = info.keys();
+    if(diskCnt != nameList.size())
     {
-        diskCnt = name.size();
+        diskCnt = nameList.size();
 
         QVector<QString> lines;
+
         for(int i = 0; i < diskCnt; ++i)
         {
-            lines.push_back(name.at(i));
+            lines.push_back(nameList.at(i));
         }
         ioCurve->setCurvesNum(lines);
     }
@@ -325,17 +327,14 @@ void MainWindow::showIoUsage(const QMap<QString, double> &info, const QStringLis
     speed.resize(diskCnt);
     for(int i = 0; i < diskCnt / 2; ++i)
     {
-        currentName = name.at(i);
+        currentName = nameList.at(2 * i);
         speed[2 * i].push_back(QPointF(timeElaspe,
                                        info.value(currentName)
                                        ));
         speed[2 * i + 1].push_back(QPointF(timeElaspe,
                                   info.value(currentName)
                                   ));
-
-        qDebug() << currentName << "r_kb " << speed[2 * i] << "w_kb " << speed[2 * i + 1];
     }
-    qDebug() << info;
 
     ioCurve->addData(speed);
 }
