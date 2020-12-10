@@ -398,9 +398,12 @@ public:
      * movable, floatable or closable and the titlebar of the central
      * dock area is not visible.
      * If the given widget could be set as central widget, the function returns
-     * the created cok area. If the widget could not be set, because there
+     * the created dock area. If the widget could not be set, because there
      * is already a central widget, this function returns a nullptr.
      * To clear the central widget, pass a nullptr to the function.
+     * \note Setting a central widget is only possible if no other dock widgets
+     * have been registered before. That means, this function should be the
+     * first function that you call before you add other dock widgets.
      * \retval != 0 The dock area that contains the central widget
      * \retval nullptr Indicates that the given widget can not be set as central
      *         widget because there is already a central widget.
@@ -476,6 +479,33 @@ public:
 	bool eventFilter(QObject *obj, QEvent *e) override;
 #endif
 
+	/**
+	 * Returns the dock widget that has focus style in the ui or a nullptr if
+	 * not dock widget is painted focused.
+	 * If the flag FocusHighlighting is disabled, this function always returns
+	 * nullptr.
+	 */
+	CDockWidget* focusedDockWidget() const;
+
+    /**
+     * Returns the sizes of the splitter that contains the dock area.
+     *
+     * If there is no splitter that contains the area, an empty list will be
+     * returned.
+     */
+    QList<int> splitterSizes(CDockAreaWidget *ContainedArea) const;
+
+    /**
+     * Update the sizes of a splitter
+     * Programmatically updates the sizes of a given splitter by calling
+     * QSplitter::setSizes(). The splitter will be the splitter that
+     * contains the supplied dock area widget. If there is not splitter
+     * that contains the dock area, or the sizes supplied does not match
+     * the number of children of the splitter, this method will have no
+     * effect.
+     */
+    void setSplitterSizes(CDockAreaWidget *ContainedArea, const QList<int>& sizes);
+
 public slots:
 	/**
 	 * Opens the perspective with the given name.
@@ -543,6 +573,12 @@ signals:
      * tooltips for the DockArea buttons.
      */
     void dockAreaCreated(ads::CDockAreaWidget* DockArea);
+
+    /**
+     * This signal is emitted if a dock widget has been added to this
+     * dock manager instance.
+     */
+    void dockWidgetAdded(ads::CDockWidget* DockWidget);
 
     /**
      * This signal is emitted just before the given dock widget is removed

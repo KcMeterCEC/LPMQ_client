@@ -59,7 +59,7 @@ QT += network
 
 # Qt-Advanced-Docking-System
 INCLUDEPATH += 3rdlib/ads/include
-LIBS += -L"3rdlib/ads/lib" -lqtadvanceddockingd
+LIBS += -L$$PWD/3rdlib/ads/lib -lqtadvanceddockingd
 
 # QSS
 RESOURCES += 3rdlib/qdarkstyle/style.qrc \
